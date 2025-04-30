@@ -15,9 +15,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${mono.variable} ${grotesk.variable}`}>
-      <body className="font-mono bg-[#f5f5f5] text-black antialiased">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <div className={`${mono.variable} ${grotesk.variable} font-mono bg-[#f5f5f5] text-black antialiased min-h-screen`}>
+          {children}
+        </div>
       </body>
     </html>
   );
