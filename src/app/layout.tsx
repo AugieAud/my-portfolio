@@ -1,9 +1,12 @@
-import "../app/globals.css";
-import Navbar from "../app/components/Navbar";
-import Footer from "../app/components/Footer";
+import "./globals.css";
+import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata = {
-  title: "Augie Schnell | Developer Portfolio",
+  title: "Augie Schnell | Portfolio",
+  description: "Software developer porfolio and personal website.",
 };
 
 export default function RootLayout({
@@ -12,11 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+    <html lang="en" className={`${mono.variable} ${grotesk.variable}`}>
+      <body className="font-mono bg-[#f5f5f5] text-black antialiased">
+        {children}
       </body>
     </html>
   );
