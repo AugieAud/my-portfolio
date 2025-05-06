@@ -1,5 +1,5 @@
 import Navbar from "../app/components/Navbar";
-import ParticleBackground from "./components/ParticleBackground";
+import ShaderBackground from "./components/ShaderBackground";
 
 export default function Home() {
   return (
@@ -7,7 +7,7 @@ export default function Home() {
       <Navbar />
 
       {/* Main Content */}
-      <ParticleBackground />
+      <ShaderBackground />
       <section className="fixed bottom-0 right-0 p-8 flex items-end justify-end">
         <p className="max-w-md text-sm leading-relaxed">
           <br />
