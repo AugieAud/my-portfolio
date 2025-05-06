@@ -17,7 +17,7 @@ export default function Navbar() {
           </ul>
         </nav>
       </div>
-      <div className="text-xs rotate-180 writing-vertical-lr uppercase tracking-widest text-gray-500">
+      <div className="text-xs writing-vertical-lr uppercase tracking-widest text-gray-500">
         Light ▪ Monospaced ▪ Brutalist
       </div>
     </aside>
