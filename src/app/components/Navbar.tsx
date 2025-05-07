@@ -9,11 +9,9 @@ export default function Navbar() {
 
         <nav className="mt-8 space-y-2">
           <ul className="space-y-2">
-            <li className="font-bold">● Projects</li>
+            <li>Projects</li>
             <li>Info</li>
             <li>Contact</li>
-            <li>FAQ</li>
-            <li>Extras</li>
           </ul>
         </nav>
       </div>
