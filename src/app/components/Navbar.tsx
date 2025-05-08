@@ -1,4 +1,11 @@
-export default function Navbar() {
+interface NavbarProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+}
+
+export default function Navbar({ activeSection, onSectionChange }: NavbarProps) {
+  const sections = ['Projects', 'Info', 'Contact'];
+
   return (
     <aside className="w-1/4 p-8 border-r border-gray-300 flex flex-col justify-between">
       <div>
@@ -9,9 +16,17 @@ export default function Navbar() {
 
         <nav className="mt-8 space-y-2">
           <ul className="space-y-2">
-            <li>Projects</li>
-            <li>Info</li>
-            <li>Contact</li>
+            {sections.map((section) => (
+              <li
+                key={section}
+                onClick={() => onSectionChange(section)}
+                className={`cursor-pointer hover:text-gray-600 transition-colors ${
+                  activeSection === section ? 'font-medium' : ''
+                }`}
+              >
+                {section}
+              </li>
+            ))}
           </ul>
         </nav>
       </div>
