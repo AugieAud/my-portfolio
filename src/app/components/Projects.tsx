@@ -1,5 +1,7 @@
+"use client";
+
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Project {
   title: string;
@@ -24,14 +26,14 @@ export default function Projects() {
   const [[currentIndex, direction], setPage] = useState([0, 0]);
   const [isScrolling, setIsScrolling] = useState(false);
 
-  const paginate = (newDirection: number) => {
+  const paginate = useCallback((newDirection: number) => {
     if (isScrolling) return;
     setIsScrolling(true);
     const nextIndex = currentIndex + newDirection;
     if (nextIndex >= 0 && nextIndex < projects.length) {
       setPage([nextIndex, newDirection]);
     }
-  };
+  }, [currentIndex, isScrolling]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -44,7 +46,7 @@ export default function Projects() {
 
     window.addEventListener('wheel', handleWheel);
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [currentIndex, isScrolling]);
+  }, [currentIndex, isScrolling, paginate]);
 
   const slideVariants = {
     enter: (direction: number) => ({

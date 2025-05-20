@@ -1,6 +1,6 @@
 "use client";
 
-import { extend, useFrame, Canvas, useThree } from "@react-three/fiber";
+import { useFrame, Canvas, useThree } from "@react-three/fiber";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
@@ -37,32 +37,12 @@ const vertexShader = `
   }
 `;
 
-// Create the shader material directly using Three.js
-class CustomShaderMaterial extends THREE.ShaderMaterial {
-  constructor() {
-    super({
-      uniforms: {
-        uTime: { value: 0 },
-        uMouse: { value: new THREE.Vector2(0.5, 0.5) }
-      },
-      vertexShader,
-      fragmentShader,
-      transparent: true
-    });
-  }
-}
 
-declare module '@react-three/fiber' {
-  interface ThreeElements {
-    customShaderMaterial: any;
-  }
-}
 
-// Register the material with React Three Fiber
-extend({ CustomShaderMaterial });
+
 
 function ShaderPlane() {
-  const materialRef = useRef<CustomShaderMaterial>(null);
+  const materialRef = useRef<THREE.ShaderMaterial>(null!);
   const { size } = useThree();
 
   useEffect(() => {
@@ -86,7 +66,16 @@ function ShaderPlane() {
   return (
     <mesh>
       <planeGeometry args={[2, 2]} />
-      <customShaderMaterial ref={materialRef} />
+      <shaderMaterial
+        ref={materialRef}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        uniforms={{
+          uTime: { value: 0 },
+          uMouse: { value: new THREE.Vector2(0.5, 0.5) }
+        }}
+        transparent
+      />
     </mesh>
   );
 }

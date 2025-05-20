@@ -3,7 +3,7 @@ export default function Contact() {
     <div className="p-8 max-w-2xl">
       <h2 className="text-2xl font-semibold mb-4">Get in Touch</h2>
       <p className="text-gray-600 mb-4">
-        I'm always open to new opportunities and collaborations.
+        I&apos;m always open to new opportunities and collaborations.
       </p>
       <div className="space-y-2">
         <p className="flex items-center">
