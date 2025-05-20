@@ -9,7 +9,10 @@ export default function Navbar({ activeSection, onSectionChange }: NavbarProps) 
   return (
     <aside className="w-1/4 p-8 border-r border-gray-300 flex flex-col justify-between">
       <div>
-        <h1 className="text-4xl font-sans tracking-wide leading-none">
+        <h1 
+          className="text-4xl font-sans tracking-wide leading-none cursor-pointer hover:text-gray-600 transition-colors"
+          onClick={() => onSectionChange('Home')}
+        >
           AUGIE SCHNELL
         </h1>
         <p className="mt-2 text-sm">Creative Developer</p>
