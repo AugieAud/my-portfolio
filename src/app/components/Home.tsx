@@ -3,7 +3,8 @@ import { useEffect, useRef } from 'react';
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
+  const mouseRef = useRef({ x: 0, y: 0, isActive: false });
+  const timeRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,22 +29,34 @@ export default function Home() {
     setCanvasSize();
     window.addEventListener('resize', setCanvasSize);
 
-    // Track mouse movement
+    // Track mouse movement and state
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouseRef.current = {
         x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        y: e.clientY - rect.top,
+        isActive: true
       };
     };
 
-    // Set initial mouse position to center
+    const handleMouseLeave = () => {
+      mouseRef.current.isActive = false;
+    };
+
+    const handleClick = () => {
+      mouseRef.current.isActive = !mouseRef.current.isActive;
+    };
+
+    // Set initial mouse state
     mouseRef.current = {
       x: canvas.width / 2,
-      y: canvas.height / 2
+      y: canvas.height / 2,
+      isActive: false
     };
 
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('click', handleClick);
     setCanvasSize();
 
     class Particle {
@@ -64,37 +77,49 @@ export default function Home() {
         this.height = height;
         this.centerX = width / 2;
         this.centerY = height / 2;
-        this.radius = Math.random() * 150 + 50; // Wider spread
+        this.radius = Math.random() * 200 + 50; // Even wider spread
         this.angle = Math.random() * Math.PI * 2;
-        this.speed = Math.random() * 0.002 + 0.001; // Varied speeds for flowing effect
-        this.size = Math.random() * 1.2 + 0.3; // Smaller particles
-        this.opacity = Math.random() * 0.15 + 0.05; // More transparent
+        this.speed = Math.random() * 0.003 + 0.001; // Varied speeds
+        this.size = Math.random() * 1 + 0.2; // Even smaller particles
+        this.opacity = Math.random() * 0.12 + 0.03; // More transparent
         
         // Distribute particles across the screen
         this.x = Math.random() * width;
         this.y = Math.random() * height;
       }
 
-      update(targetX: number, targetY: number) {
-        // Calculate distance to target
-        const dx = targetX - this.x;
-        const dy = targetY - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+      update(targetX: number, targetY: number, time: number, isMouseActive: boolean) {
+        if (isMouseActive) {
+          // Mouse-following behavior
+          const dx = targetX - this.x;
+          const dy = targetY - this.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          const speedMultiplier = Math.min(distance / 200, 2);
+          const moveX = dx * this.speed * speedMultiplier;
+          const moveY = dy * this.speed * speedMultiplier;
+          
+          this.x += moveX;
+          this.y += moveY;
+        } else {
+          // Autonomous swirling behavior
+          const noiseScale = 0.002;
+          const swirl = time * 0.0001;
+          
+          this.x += Math.sin(time * this.speed + this.angle) * 2;
+          this.y += Math.cos(time * this.speed + this.angle) * 2;
+          
+          // Add circular motion
+          const circleX = this.width / 2 + Math.cos(swirl + this.angle) * this.radius;
+          const circleY = this.height / 2 + Math.sin(swirl + this.angle) * this.radius;
+          
+          this.x += (circleX - this.x) * 0.005;
+          this.y += (circleY - this.y) * 0.005;
+        }
         
-        // Adjust speed based on distance (particles further away move faster)
-        const speedMultiplier = Math.min(distance / 200, 2);
-        
-        // Calculate movement with inertia
-        const moveX = dx * this.speed * speedMultiplier;
-        const moveY = dy * this.speed * speedMultiplier;
-        
-        // Update position with smooth following
-        this.x += moveX;
-        this.y += moveY;
-        
-        // Add flowing movement
-        this.x += Math.sin(Date.now() * 0.001 + this.angle) * 0.3;
-        this.y += Math.cos(Date.now() * 0.001 + this.angle) * 0.3;
+        // Keep particles within bounds
+        this.x = (this.x + this.width) % this.width;
+        this.y = (this.y + this.height) % this.height;
       }
 
       draw(ctx: CanvasRenderingContext2D) {
@@ -107,7 +132,7 @@ export default function Home() {
 
     // Particle system
     const particles: Particle[] = [];
-    const particleCount = 2000; // Increased number of particles
+    const particleCount = 3500; // Increased number of particles
 
     // Initialize particles
     for (let i = 0; i < particleCount; i++) {
@@ -119,8 +144,15 @@ export default function Home() {
       if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
+      timeRef.current += 1;
+      
       particles.forEach(particle => {
-        particle.update(mouseRef.current.x, mouseRef.current.y);
+        particle.update(
+          mouseRef.current.x,
+          mouseRef.current.y,
+          timeRef.current,
+          mouseRef.current.isActive
+        );
         particle.draw(ctx);
       });
 
@@ -132,6 +164,8 @@ export default function Home() {
     return () => {
       window.removeEventListener('resize', setCanvasSize);
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('click', handleClick);
     };
   }, []);
 
