@@ -11,8 +11,10 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<string>("Home");
 
   return (
-    <main className="flex h-screen relative overflow-hidden">
-      <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
+    <main className="flex h-screen overflow-hidden">
+      <div className="z-10 relative">
+        <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 relative">
