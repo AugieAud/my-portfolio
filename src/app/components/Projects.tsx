@@ -66,7 +66,13 @@ export default function Projects() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <motion.div
+      className="relative h-screen w-full overflow-hidden"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
       <AnimatePresence initial={false} custom={direction} onExitComplete={() => setIsScrolling(false)}>
         <motion.div
           key={currentIndex}
@@ -120,6 +126,6 @@ export default function Projects() {
           />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

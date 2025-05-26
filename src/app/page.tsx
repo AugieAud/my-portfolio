@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import Navbar from "../app/components/Navbar";
 import Projects from "../app/components/Projects";
 import Info from "../app/components/Info";
@@ -11,17 +12,17 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<string>("Home");
 
   return (
-    <main className="flex h-screen overflow-hidden">
-      <div className="z-10 relative">
-        <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
-      </div>
+    <main className="flex h-screen relative overflow-hidden">
+      <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
 
       {/* Main Content */}
       <div className="flex-1 relative">
-        {activeSection === "Home" && <HomeComponent />}
-        {activeSection === "Projects" && <Projects />}
-        {activeSection === "Info" && <Info />}
-        {activeSection === "Contact" && <Contact />}
+        <AnimatePresence mode="wait">
+          {activeSection === "Home" && <HomeComponent key="home" />}
+          {activeSection === "Projects" && <Projects key="projects" />}
+          {activeSection === "Info" && <Info key="info" />}
+          {activeSection === "Contact" && <Contact key="contact" />}
+        </AnimatePresence>
       </div>
     </main>
   );

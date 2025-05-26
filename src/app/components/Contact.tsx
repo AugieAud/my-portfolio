@@ -1,12 +1,52 @@
+"use client";
+
+import { motion } from 'framer-motion';
+
 export default function Contact() {
+  const containerVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 20 }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="p-8 max-w-2xl">
-      <h2 className="text-2xl font-semibold mb-4">Get in Touch</h2>
-      <p className="text-gray-600 mb-4">
+    <motion.div
+      className="p-8 max-w-2xl"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
+      <motion.h2
+        className="text-2xl font-semibold mb-4"
+        variants={itemVariants}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        Get in Touch
+      </motion.h2>
+      <motion.p
+        className="text-gray-600 mb-4"
+        variants={itemVariants}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
         I&apos;m always open to new opportunities and collaborations.
-      </p>
-      <div className="space-y-2">
-        <p className="flex items-center">
+      </motion.p>
+      <motion.div
+        className="space-y-2"
+        variants={itemVariants}
+        transition={{ delay: 0.4, duration: 0.5 }}
+      >
+        <motion.p
+          className="flex items-center"
+          variants={itemVariants}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
           <span className="font-medium mr-2">Email:</span>
           <a
             href="mailto:ajschnello@gmail.com"
@@ -14,8 +54,12 @@ export default function Contact() {
           >
             ajschnello@gmail.com
           </a>
-        </p>
-        <p className="flex items-center">
+        </motion.p>
+        <motion.p
+          className="flex items-center"
+          variants={itemVariants}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
           <span className="font-medium mr-2">LinkedIn:</span>
           <a
             href="https://www.linkedin.com/in/augie-schnell-067980342/"
@@ -25,9 +69,12 @@ export default function Contact() {
           >
             linkedin.com/in/augie-schnell-067980342/
           </a>
-
-        </p>
-        <p className="flex items-center">
+        </motion.p>
+        <motion.p
+          className="flex items-center"
+          variants={itemVariants}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
           <span className="font-medium mr-2">Github:</span>
           <a
             href="https://github.com/AugieAud"
@@ -37,8 +84,8 @@ export default function Contact() {
           >
             github.com/AugieAud
           </a>
-        </p>
-      </div>
-    </div>
+        </motion.p>
+      </motion.div>
+    </motion.div>
   );
 }
