@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -125,10 +125,10 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
   return (
     <points ref={mesh} geometry={geometry}>
       <pointsMaterial
-        size={0.02}
+        size={0.05}
         vertexColors
         transparent
-        opacity={0.8}
+        opacity={1}
         blending={THREE.AdditiveBlending}
       />
     </points>
@@ -138,7 +138,9 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
 export default function ParticleFieldScene() {
   const mouse = useRef<[number, number]>([0, 0]);
 
-  useMemo(() => {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleMouseMove = (event: MouseEvent) => {
       mouse.current = [event.clientX, event.clientY];
     };
@@ -148,9 +150,9 @@ export default function ParticleFieldScene() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none">
+    <div className="w-full h-screen">
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 75 }}
+        camera={{ position: [0, 0, 4], fov: 60 }}
         gl={{ antialias: true, alpha: true }}
       >
         <ParticleSystem count={2000} mouse={mouse} />
