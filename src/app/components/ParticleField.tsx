@@ -34,11 +34,11 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
       velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.01;
       velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.01;
 
-      // Gradient colors from purple to blue
-      const t = Math.random();
-      colors[i * 3] = 0.5 + t * 0.2;     // R: purple to blue
-      colors[i * 3 + 1] = 0.2 + t * 0.1;  // G
-      colors[i * 3 + 2] = 0.9;            // B: keep blue high
+      // Black chrome effect with subtle variations
+      const t = Math.random() * 0.15; // Subtle metallic variation
+      colors[i * 3] = 0.1 + t;     // R: dark with slight variation
+      colors[i * 3 + 1] = 0.1 + t;  // G: match R for grayscale
+      colors[i * 3 + 2] = 0.12 + t;  // B: slightly higher for chrome effect
     }
 
     return {
@@ -125,11 +125,13 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
   return (
     <points ref={mesh} geometry={geometry}>
       <pointsMaterial
-        size={0.05}
+        size={0.04}
         vertexColors
         transparent
-        opacity={1}
+        opacity={0.9}
         blending={THREE.AdditiveBlending}
+        sizeAttenuation={true}
+        depthWrite={false}
       />
     </points>
   );
