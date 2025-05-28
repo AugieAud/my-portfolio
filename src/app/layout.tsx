@@ -1,5 +1,6 @@
 import "./globals.css";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import ParticleField from "./components/ParticleField";
 
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-sans" });
@@ -17,8 +18,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <div className={`${mono.variable} ${grotesk.variable} font-mono bg-[#f5f5f5] text-black antialiased min-h-screen`}>
-          {children}
+        <div className={`${mono.variable} ${grotesk.variable} font-mono text-black antialiased min-h-screen relative`}>
+          <div className="fixed inset-0 -z-10">
+            <ParticleField count={2000} />
+          </div>
+          <div className="relative z-10">
+            {children}
+          </div>
         </div>
       </body>
     </html>

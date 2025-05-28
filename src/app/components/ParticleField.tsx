@@ -1,15 +1,22 @@
 "use client";
 
-import { useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import { useRef, useMemo, useEffect } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 interface ParticleProps {
   count: number;
   mouse: React.MutableRefObject<[number, number]>;
+  isMouseDown: React.MutableRefObject<boolean>;
+  isMouseInCanvas: React.MutableRefObject<boolean>;
 }
 
-function ParticleSystem({ count, mouse }: ParticleProps) {
+function ParticleSystem({
+  count,
+  mouse,
+  isMouseDown,
+  isMouseInCanvas,
+}: ParticleProps) {
   const mesh = useRef<THREE.Points>(null);
   const hover = useRef(false);
 
@@ -18,11 +25,11 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
     const positions = new Float32Array(count * 3);
     const velocities = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
-    
+
     for (let i = 0; i < count; i++) {
       // Position particles in a sphere
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos((Math.random() * 2) - 1);
+      const phi = Math.acos(Math.random() * 2 - 1);
       const radius = Math.random() * 2;
 
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
@@ -34,17 +41,18 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
       velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.01;
       velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.01;
 
-      // Black chrome effect with subtle variations
-      const t = Math.random() * 0.15; // Subtle metallic variation
-      colors[i * 3] = 0.1 + t;     // R: dark with slight variation
-      colors[i * 3 + 1] = 0.1 + t;  // G: match R for grayscale
-      colors[i * 3 + 2] = 0.12 + t;  // B: slightly higher for chrome effect
+      // Pure black with minimal variation
+      const t = Math.random() * 0.03; // Tiny variation for depth
+      const baseColor = 0.05; // Very dark base
+      colors[i * 3] = baseColor + t; // R
+      colors[i * 3 + 1] = baseColor + t; // G
+      colors[i * 3 + 2] = baseColor + t; // B
     }
 
     return {
       positions,
       velocities,
-      colors
+      colors,
     };
   }, [count]);
 
@@ -53,8 +61,8 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
   // Create geometry with attributes
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     return geo;
   }, [positions, colors]);
 
@@ -75,48 +83,64 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
       const y = positions.array[i3 + 1];
       const z = positions.array[i3 + 2];
 
-      // Force fields
-      const angle = time * 0.5 + i * 0.02;
-      const forcefield1 = new THREE.Vector3(
-        Math.sin(angle) * 2,
-        Math.cos(angle) * 2,
-        Math.sin(time * 0.3) * 2
+      // Create flowing streams
+      const streamFreq = 0.15;
+      const streamSpeed = 0.15;
+      
+      // Each particle follows a unique flowing path
+      const particleOffset = i * 0.1;
+      const flowX = Math.sin(time * streamSpeed + particleOffset) * 2;
+      const flowY = Math.cos(time * streamSpeed * 0.5 + particleOffset) * 2;
+      
+      // Add some vertical wave motion
+      const waveY = Math.sin(x * streamFreq + time) * 0.5;
+      
+      // Target position (where particles want to go)
+      let targetX, targetY, targetZ;
+
+      if (isMouseDown.current || !isMouseInCanvas.current) {
+        // Gentle dispersion
+        const dispersionAngle = i * 1234.5678;
+        targetX = x + Math.sin(dispersionAngle + time) * 0.1;
+        targetY = y + Math.cos(dispersionAngle + time) * 0.1;
+        targetZ = z + Math.sin(dispersionAngle * 0.5 + time) * 0.1;
+      } else {
+        // Flow mode with subtle mouse influence
+        const distToMouse = Math.hypot(x - mouseX * 2, y - mouseY * 2);
+        const mouseInfluence = Math.max(0, 1 - distToMouse * 0.8) * 0.015;
+        
+        // Combine flow and mouse influence
+        targetX = x + (flowX - x) * 0.01 + (mouseX * 2 - x) * mouseInfluence;
+        targetY = y + (flowY + waveY - y) * 0.01 + (mouseY * 2 - y) * mouseInfluence;
+        targetZ = z + (Math.sin(time + particleOffset) * 0.1 - z) * 0.01;
+      }
+
+      // Update velocities with momentum
+      const momentum = 0.98;
+      const acceleration = 0.015;
+      
+      velocities[i3] = velocities[i3] * momentum + (targetX - x) * acceleration;
+      velocities[i3 + 1] = velocities[i3 + 1] * momentum + (targetY - y) * acceleration;
+      velocities[i3 + 2] = velocities[i3 + 2] * momentum + (targetZ - z) * acceleration;
+      
+      // Limit speed to prevent particles from moving too fast
+      const maxSpeed = 0.03;
+      const speed = Math.sqrt(
+        velocities[i3] * velocities[i3] + 
+        velocities[i3 + 1] * velocities[i3 + 1] + 
+        velocities[i3 + 2] * velocities[i3 + 2]
       );
-
-      const forcefield2 = new THREE.Vector3(
-        mouseX * 3,
-        mouseY * 3,
-        0
-      );
-
-      // Calculate forces
-      const distanceToField1 = forcefield1.distanceTo(new THREE.Vector3(x, y, z));
-      const distanceToField2 = forcefield2.distanceTo(new THREE.Vector3(x, y, z));
-
-      // Apply forces
-      const force1 = forcefield1.sub(new THREE.Vector3(x, y, z)).multiplyScalar(0.0001 / distanceToField1);
-      const force2 = forcefield2.sub(new THREE.Vector3(x, y, z)).multiplyScalar(0.0002 / distanceToField2);
-
-      // Update velocities
-      velocities[i3] += force1.x + force2.x;
-      velocities[i3 + 1] += force1.y + force2.y;
-      velocities[i3 + 2] += force1.z + force2.z;
-
-      // Apply damping
-      velocities[i3] *= 0.99;
-      velocities[i3 + 1] *= 0.99;
-      velocities[i3 + 2] *= 0.99;
+      
+      if (speed > maxSpeed) {
+        velocities[i3] *= maxSpeed / speed;
+        velocities[i3 + 1] *= maxSpeed / speed;
+        velocities[i3 + 2] *= maxSpeed / speed;
+      }
 
       // Update positions
       positions.array[i3] += velocities[i3];
       positions.array[i3 + 1] += velocities[i3 + 1];
       positions.array[i3 + 2] += velocities[i3 + 2];
-
-      // Keep particles within bounds
-      const bound = 3;
-      if (Math.abs(positions.array[i3]) > bound) positions.array[i3] *= 0.95;
-      if (Math.abs(positions.array[i3 + 1]) > bound) positions.array[i3 + 1] *= 0.95;
-      if (Math.abs(positions.array[i3 + 2]) > bound) positions.array[i3 + 2] *= 0.95;
     }
 
     positions.needsUpdate = true;
@@ -125,13 +149,29 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
   return (
     <points ref={mesh} geometry={geometry}>
       <pointsMaterial
-        size={0.04}
+        size={0.05}
         vertexColors
         transparent
-        opacity={0.9}
-        blending={THREE.AdditiveBlending}
+        opacity={0.95}
+        blending={THREE.NormalBlending}
         sizeAttenuation={true}
         depthWrite={false}
+        map={useMemo(() => {
+          if (typeof window === 'undefined') return null;
+          const canvas = document.createElement('canvas');
+          canvas.width = 32;
+          canvas.height = 32;
+          const context = canvas.getContext('2d');
+          if (!context) return null;
+          
+          const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
+          gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          context.fillStyle = gradient;
+          context.fillRect(0, 0, 32, 32);
+          
+          return new THREE.CanvasTexture(canvas);
+        }, [])}
       />
     </points>
   );
@@ -139,16 +179,56 @@ function ParticleSystem({ count, mouse }: ParticleProps) {
 
 export default function ParticleFieldScene() {
   const mouse = useRef<[number, number]>([0, 0]);
+  const isMouseDown = useRef(false);
+  const isMouseInCanvas = useRef(true);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleMouseMove = (event: MouseEvent) => {
       mouse.current = [event.clientX, event.clientY];
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseDown = () => {
+      if (isMouseDown.current !== undefined) {
+        isMouseDown.current = true;
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (isMouseDown.current !== undefined) {
+        isMouseDown.current = false;
+      }
+    };
+
+    const handleMouseEnter = () => {
+      if (isMouseInCanvas.current !== undefined) {
+        isMouseInCanvas.current = true;
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (isMouseInCanvas.current !== undefined) {
+        isMouseInCanvas.current = false;
+      }
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mouseenter", handleMouseEnter);
+    window.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mouseenter", handleMouseEnter);
+      window.removeEventListener("mouseleave", handleMouseLeave);
+    };
   }, []);
 
   return (
@@ -157,7 +237,12 @@ export default function ParticleFieldScene() {
         camera={{ position: [0, 0, 4], fov: 60 }}
         gl={{ antialias: true, alpha: true }}
       >
-        <ParticleSystem count={2000} mouse={mouse} />
+        <ParticleSystem
+          count={2000}
+          mouse={mouse}
+          isMouseDown={isMouseDown}
+          isMouseInCanvas={isMouseInCanvas}
+        />
       </Canvas>
     </div>
   );
