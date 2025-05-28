@@ -20,7 +20,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <div className={`${mono.variable} ${grotesk.variable} font-mono text-black antialiased min-h-screen relative`}>
           <div className="fixed inset-0 -z-10">
-            <ParticleField count={2000} />
+            <ParticleField />
           </div>
           <div className="relative z-10">
             {children}
