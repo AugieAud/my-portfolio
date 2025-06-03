@@ -42,6 +42,13 @@ export default function Projects() {
       const nextIndex = currentIndex + newDirection;
       if (nextIndex >= 0 && nextIndex < projects.length) {
         setPage([nextIndex, newDirection]);
+        // Reset scrolling state after animation completes
+        setTimeout(() => {
+          setIsScrolling(false);
+        }, 500);
+      } else {
+        // Reset scrolling state if we can't move in that direction
+        setIsScrolling(false);
       }
     },
     [currentIndex, isScrolling]
