@@ -4,13 +4,31 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Theme = 'light' | 'dark' | 'color';
 
+// Keep track of recently used colors to avoid repetition
+const recentColors = new Set<number>();
+const MAX_RECENT_COLORS = 10; // How many colors to remember
+
 const generateRandomColor = () => {
-  const hue = Math.floor(Math.random() * 360);
+  let hue: number;
+  // Keep generating until we find a hue we haven't used recently
+  do {
+    hue = Math.floor(Math.random() * 360);
+  } while (recentColors.has(hue));
+
+  // Add the new hue to recent colors
+  recentColors.add(hue);
+  // Remove oldest color if we've reached our limit
+  if (recentColors.size > MAX_RECENT_COLORS) {
+    recentColors.delete(Array.from(recentColors)[0]);
+  }
+
   return `hsl(${hue}, 70%, 85%)`; // Light background
 };
 
 const generateRandomDarkColor = () => {
-  const hue = Math.floor(Math.random() * 360);
+  // Use the most recently added hue from recentColors for the text color
+  // This ensures the text color matches the background theme
+  const hue = Array.from(recentColors).pop() || Math.floor(Math.random() * 360);
   return `hsl(${hue}, 70%, 25%)`; // Dark text color that contrasts with the light background
 };
 
