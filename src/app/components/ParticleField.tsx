@@ -157,20 +157,25 @@ function ParticleSystem({
         sizeAttenuation={true}
         depthWrite={false}
         map={useMemo(() => {
-          if (typeof window === 'undefined') return null;
-          const canvas = document.createElement('canvas');
-          canvas.width = 32;
-          canvas.height = 32;
-          const context = canvas.getContext('2d');
-          if (!context) return null;
-          
-          const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
-          gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-          context.fillStyle = gradient;
-          context.fillRect(0, 0, 32, 32);
-          
-          return new THREE.CanvasTexture(canvas);
+          try {
+            if (typeof window === 'undefined') return null;
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const context = canvas.getContext('2d');
+            if (!context) return null;
+            
+            const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, 32, 32);
+            
+            return new THREE.CanvasTexture(canvas);
+          } catch (error) {
+            console.error('Error creating particle texture:', error);
+            return null;
+          }
         }, [])}
       />
     </points>
