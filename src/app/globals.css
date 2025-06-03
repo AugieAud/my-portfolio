@@ -2,20 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* Light theme */
+:root,
+.light {
   --background: #ffffff;
   --foreground: #171717;
+  --accent: #2563eb;
+  --border: #e5e7eb;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark theme */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --accent: #60a5fa;
+  --border: #374151;
+}
+
+.text-foreground {
+  color: var(--foreground);
+}
+
+/* Color theme */
+.color {
+  --background: var(--random-background);
+  --foreground: var(--random-text);
+  --accent: var(--random-text);
+  --border: var(--random-text);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme-specific styles */
+.dark aside {
+  border-color: var(--border);
+}
+
+.minimal {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.minimal aside {
+  border-color: var(--border);
 }
