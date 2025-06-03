@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 const ButteredBread = "/media/Buttered Bread Demo.mov";
 
 interface Project {
@@ -31,6 +31,9 @@ const projects: Project[] = [
 export default function Projects() {
   const [[currentIndex, direction], setPage] = useState([0, 0]);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const paginate = useCallback(
     (newDirection: number) => {
@@ -43,6 +46,13 @@ export default function Projects() {
     },
     [currentIndex, isScrolling]
   );
+
+  // Pause video when switching projects
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [currentIndex]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -100,20 +110,60 @@ export default function Projects() {
           }}
           className="absolute inset-0 flex flex-col md:flex-row items-center justify-center p-8 gap-8"
         >
-          <div className="md:w-1/2 h-full flex items-center justify-center">
+          <div className="md:w-2/3 h-full flex items-center justify-center">
             {projects[currentIndex].type === "video" ? (
-              <motion.video
-                src={projects[currentIndex].mediaUrl}
-                className="w-full h-[400px] object-cover rounded-lg shadow-lg"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
-              />
+              <button 
+                className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
+                onClick={() => {
+                  if (videoRef.current) {
+                    if (videoRef.current.paused) {
+                      videoRef.current.play();
+                      setIsPlaying(true);
+                    } else {
+                      videoRef.current.pause();
+                      setIsPlaying(false);
+                    }
+                  }
+                }}
+              >
+                <motion.video
+                  ref={videoRef}
+                  src={projects[currentIndex].mediaUrl}
+                  className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  loop
+                  muted
+                  playsInline
+                  onEnded={() => setIsPlaying(false)}
+                  onPause={() => setIsPlaying(false)}
+                  onPlay={() => setIsPlaying(true)}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
+                    {!isPlaying ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                        className="w-16 h-16"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                        className="w-16 h-16"
+                      >
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              </button>
             ) : (
               <motion.img
                 src={projects[currentIndex].mediaUrl}
@@ -125,7 +175,7 @@ export default function Projects() {
               />
             )}
           </div>
-          <div className="md:w-1/2 flex flex-col justify-center">
+          <div className="md:w-1/3 flex flex-col justify-center space-y-4 text-center md:text-left">
             <motion.h3
               className="text-3xl font-semibold mb-6"
               initial={{ y: 20, opacity: 0 }}
