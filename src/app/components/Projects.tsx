@@ -2,7 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
-const ButteredBread = "/media/Buttered Bread Demo.mov";
+const ButteredBread = "/media/Buttered Bread Demo.mp4";
+const PhaserGame = "/media/2D game.mp4";
+const Buzzly = "/media/Buzzly Survey.mp4";
 
 interface Project {
   title: string;
@@ -22,13 +24,13 @@ const projects: Project[] = [
   {
     title: "Placeholder Title 2D Game",
     description: "Placeholder description for 2D Game. Please replace.",
-    mediaUrl: "/media/2D game.mov",
+    mediaUrl: PhaserGame,
     type: "video",
   },
   {
     title: "Placeholder Title Buzzly Survey",
     description: "Placeholder description for Buzzly Survey. Please replace.",
-    mediaUrl: "/media/Buzzly Survey.mov",
+    mediaUrl: Buzzly,
     type: "video",
   },
   {
@@ -51,13 +53,15 @@ const projects: Project[] = [
   },
   {
     title: "Placeholder Title Marketing Association NZ",
-    description: "Placeholder description for Marketing Association NZ. Please replace.",
+    description:
+      "Placeholder description for Marketing Association NZ. Please replace.",
     mediaUrl: "/media/Marketing Association NZ.png",
     type: "image",
   },
   {
     title: "Placeholder Title Mock Job Interview",
-    description: "Placeholder description for Mock Job Interview. Please replace.",
+    description:
+      "Placeholder description for Mock Job Interview. Please replace.",
     mediaUrl: "/media/Mock job Interview.png",
     type: "image",
   },
@@ -74,7 +78,7 @@ export default function Projects() {
     const video = videoRef.current;
     if (video) {
       if (video.paused) {
-        video.play().catch(error => {
+        video.play().catch((error) => {
           console.error("Error attempting to play video:", error);
         });
       } else {
@@ -91,15 +95,15 @@ export default function Projects() {
     const handleVideoPlay = () => setIsPlaying(true);
     const handleVideoPause = () => setIsPlaying(false);
 
-    video.addEventListener('play', handleVideoPlay);
-    video.addEventListener('pause', handleVideoPause);
-    video.addEventListener('ended', handleVideoPause);
+    video.addEventListener("play", handleVideoPlay);
+    video.addEventListener("pause", handleVideoPause);
+    video.addEventListener("ended", handleVideoPause);
 
     // Cleanup listeners
     return () => {
-      video.removeEventListener('play', handleVideoPlay);
-      video.removeEventListener('pause', handleVideoPause);
-      video.removeEventListener('ended', handleVideoPause);
+      video.removeEventListener("play", handleVideoPlay);
+      video.removeEventListener("pause", handleVideoPause);
+      video.removeEventListener("ended", handleVideoPause);
     };
   }, [currentIndex]); // Re-attach listeners when the project (and thus video src) changes
 
@@ -187,7 +191,7 @@ export default function Projects() {
         >
           <div className="md:w-2/3 h-full flex items-center justify-center">
             {projects[currentIndex].type === "video" ? (
-              <button 
+              <button
                 className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
                 onClick={handlePlayPause}
               >
@@ -202,7 +206,6 @@ export default function Projects() {
                   loop
                   muted
                   playsInline
-                  
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
