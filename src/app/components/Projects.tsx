@@ -3,16 +3,24 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 
-// Use encoded URLs for videos to handle spaces in filenames
-const ButteredBread = "/media/Buttered%20Bread%20Demo.mp4";
-const PhaserGame = "/media/2D%20game.mp4";
-const Buzzly = "/media/Buzzly%20Survey.mp4";
+// Define video paths and fallback images
+const ButteredBread = "/media/Buttered Bread Demo.mp4";
+const PhaserGame = "/media/2D game.mp4";
+const Buzzly = "/media/Buzzly Survey.mp4";
+
+// Fallback images in case videos fail to load
+const fallbackImages = {
+  "Buttered Bread": "/media/Car Insurance.png", // Using existing images as fallbacks
+  "Placeholder Title 2D Game": "/media/CLI tool.png",
+  "Placeholder Title Buzzly Survey": "/media/Car ID app.png"
+};
 
 interface Project {
   title: string;
   description: string;
   mediaUrl: string;
   type: "video" | "image";
+  fallbackImage?: string;
 }
 
 const projects: Project[] = [
@@ -22,18 +30,21 @@ const projects: Project[] = [
       "My first ever coding project, a website dedicated to my love of sourdough bread. Built using HTML, CSS and vanilla JavaScript. Lot's of room for growth and improvement here but I love the vibe I was going for and it's a great starting point for my journey into web development",
     mediaUrl: ButteredBread,
     type: "video",
+    fallbackImage: fallbackImages["Buttered Bread"],
   },
   {
     title: "Placeholder Title 2D Game",
     description: "Placeholder description for 2D Game. Please replace.",
     mediaUrl: PhaserGame,
     type: "video",
+    fallbackImage: fallbackImages["Placeholder Title 2D Game"],
   },
   {
     title: "Placeholder Title Buzzly Survey",
     description: "Placeholder description for Buzzly Survey. Please replace.",
     mediaUrl: Buzzly,
     type: "video",
+    fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
   },
   {
     title: "Placeholder Title CLI Tool",
@@ -73,17 +84,23 @@ export default function Projects() {
   const [[currentIndex, direction], setPage] = useState([0, 0]);
   const [isScrolling, setIsScrolling] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState<boolean[]>(projects.map(() => false));
   const [videoError, setVideoError] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [useFallback, setUseFallback] = useState<boolean[]>(projects.map(() => false));
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>(projects.map(() => null));
 
   const handlePlayPause = () => {
-    const video = videoRef.current;
+    const video = videoRefs.current[currentIndex];
     if (video) {
       if (video.paused) {
         video.play().catch((error) => {
           console.error("Error attempting to play video:", error);
           setVideoError(true);
+          
+          // Set fallback for this specific video
+          const newUseFallback = [...useFallback];
+          newUseFallback[currentIndex] = true;
+          setUseFallback(newUseFallback);
         });
       } else {
         video.pause();
@@ -91,26 +108,72 @@ export default function Projects() {
     }
   };
 
-  // Effect to sync video play/pause state with the isPlaying state
+  // Reset video error state and handle video changes when switching projects
   useEffect(() => {
-    const video = videoRef.current;
+    setVideoError(false);
+    
+    // Pause all videos except the current one
+    videoRefs.current.forEach((video, index) => {
+      if (video && index !== currentIndex) {
+        video.pause();
+        
+        // Update playing state
+        const newIsPlaying = [...isPlaying];
+        newIsPlaying[index] = false;
+        setIsPlaying(newIsPlaying);
+      }
+    });
+    
+    // Try to play the current video if it was previously playing
+    const currentVideo = videoRefs.current[currentIndex];
+    if (currentVideo && isPlaying[currentIndex] && !useFallback[currentIndex]) {
+      currentVideo.play().catch(error => {
+        console.error("Failed to play video after switching:", error);
+      });
+    }
+  }, [currentIndex, isPlaying, useFallback]);
+
+  // Effect to set up video event listeners for the current video
+  useEffect(() => {
+    const video = videoRefs.current[currentIndex];
     if (!video) return;
+    
+    // Reset video if we're using fallback
+    if (useFallback[currentIndex]) {
+      const newIsPlaying = [...isPlaying];
+      newIsPlaying[currentIndex] = false;
+      setIsPlaying(newIsPlaying);
+      return;
+    }
 
     const handleVideoPlay = () => {
-      setIsPlaying(true);
+      const newIsPlaying = [...isPlaying];
+      newIsPlaying[currentIndex] = true;
+      setIsPlaying(newIsPlaying);
       setVideoError(false);
       console.log("Video started playing:", projects[currentIndex].mediaUrl);
     };
     
     const handleVideoPause = () => {
-      setIsPlaying(false);
+      const newIsPlaying = [...isPlaying];
+      newIsPlaying[currentIndex] = false;
+      setIsPlaying(newIsPlaying);
       console.log("Video paused:", projects[currentIndex].mediaUrl);
     };
     
     const handleVideoError = (e: Event) => {
       console.error("Video error occurred for:", projects[currentIndex].mediaUrl, e);
       setVideoError(true);
-      setIsPlaying(false);
+      
+      // Update the playing state for the current video
+      const newIsPlaying = [...isPlaying];
+      newIsPlaying[currentIndex] = false;
+      setIsPlaying(newIsPlaying);
+      
+      // Set fallback for this specific video
+      const newUseFallback = [...useFallback];
+      newUseFallback[currentIndex] = true;
+      setUseFallback(newUseFallback);
     };
     
     const handleCanPlay = () => {
@@ -125,14 +188,16 @@ export default function Projects() {
     video.addEventListener("error", handleVideoError);
     video.addEventListener("canplay", handleCanPlay);
 
-    // Force reload the video
+    // Force reload the video and log the current source
     video.load();
+    console.log("Current video source:", video.src);
+    console.log("Video ready state:", video.readyState);
     
     // Log video properties for debugging
     console.log("Current video source:", video.src);
     console.log("Video ready state:", video.readyState);
 
-    // Cleanup listeners
+    // Clean up event listeners
     return () => {
       video.removeEventListener("play", handleVideoPlay);
       video.removeEventListener("pause", handleVideoPause);
@@ -140,7 +205,7 @@ export default function Projects() {
       video.removeEventListener("error", handleVideoError);
       video.removeEventListener("canplay", handleCanPlay);
     };
-  }, [currentIndex, projects]); // Re-attach listeners when the project changes
+  }, [currentIndex, isPlaying, useFallback, projects]);
 
   const paginate = useCallback(
     (newDirection: number) => {
@@ -161,14 +226,9 @@ export default function Projects() {
     [currentIndex, isScrolling]
   );
 
-  // Reset video state when switching projects
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-      setVideoError(false);
-    }
-  }, [currentIndex]);
+  // This effect is now redundant since we handle video state in the earlier useEffect
+  // Removing this to avoid duplicate functionality
+  // The video state reset is now handled in the more comprehensive useEffect above
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -227,15 +287,15 @@ export default function Projects() {
           className="absolute inset-0 flex flex-col md:flex-row items-center justify-center p-8 gap-8"
         >
           <div className="md:w-2/3 h-full flex items-center justify-center">
-            {projects[currentIndex].type === "video" ? (
+            {projects[currentIndex].type === "video" && !useFallback[currentIndex] ? (
               <button
                 className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
                 onClick={handlePlayPause}
               >
                 <motion.video
                   key={`video-${currentIndex}-${projects[currentIndex].mediaUrl}`}
-                  ref={videoRef}
-                  src={encodeURI(projects[currentIndex].mediaUrl)}
+                  ref={(el) => { videoRefs.current[currentIndex] = el; }}
+                  src={projects[currentIndex].mediaUrl}
                   className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -248,17 +308,25 @@ export default function Projects() {
                   onError={(e) => {
                     console.error("Video error event:", e);
                     setVideoError(true);
+                    
+                    // Set fallback for this specific video
+                    const newUseFallback = [...useFallback];
+                    newUseFallback[currentIndex] = true;
+                    setUseFallback(newUseFallback);
                   }}
-                  onCanPlay={() => setVideoError(false)}
+                  onCanPlay={() => {
+                    setVideoError(false);
+                    console.log("Video can play successfully:", projects[currentIndex].mediaUrl);
+                  }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   {videoError ? (
                     <div className="bg-black bg-opacity-70 p-4 rounded-lg text-white">
-                      Error loading video. Please check if the file exists.
+                      Error loading video. Switching to fallback image...
                     </div>
                   ) : (
                     <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
-                      {!isPlaying ? (
+                      {!isPlaying[currentIndex] ? (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="white"
@@ -283,7 +351,9 @@ export default function Projects() {
               </button>
             ) : (
               <motion.img
-                src={projects[currentIndex].mediaUrl}
+                src={projects[currentIndex].type === "video" && useFallback[currentIndex] && projects[currentIndex].fallbackImage 
+                  ? projects[currentIndex].fallbackImage 
+                  : projects[currentIndex].mediaUrl}
                 alt={projects[currentIndex].title}
                 className="w-full h-[400px] object-cover rounded-lg shadow-lg"
                 initial={{ scale: 0.8, opacity: 0 }}
