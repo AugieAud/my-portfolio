@@ -71,19 +71,37 @@ export default function Projects() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            console.error("Error attempting to play video:", error);
-          });
-        }
+    const video = videoRef.current;
+    if (video) {
+      if (video.paused) {
+        video.play().catch(error => {
+          console.error("Error attempting to play video:", error);
+        });
       } else {
-        videoRef.current.pause();
+        video.pause();
       }
     }
   };
+
+  // Effect to sync video play/pause state with the isPlaying state
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleVideoPlay = () => setIsPlaying(true);
+    const handleVideoPause = () => setIsPlaying(false);
+
+    video.addEventListener('play', handleVideoPlay);
+    video.addEventListener('pause', handleVideoPause);
+    video.addEventListener('ended', handleVideoPause);
+
+    // Cleanup listeners
+    return () => {
+      video.removeEventListener('play', handleVideoPlay);
+      video.removeEventListener('pause', handleVideoPause);
+      video.removeEventListener('ended', handleVideoPause);
+    };
+  }, [currentIndex]); // Re-attach listeners when the project (and thus video src) changes
 
   const paginate = useCallback(
     (newDirection: number) => {
@@ -174,6 +192,7 @@ export default function Projects() {
                 onClick={handlePlayPause}
               >
                 <motion.video
+                  key={projects[currentIndex].mediaUrl} // Add key here
                   ref={videoRef}
                   src={projects[currentIndex].mediaUrl}
                   className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
@@ -183,9 +202,7 @@ export default function Projects() {
                   loop
                   muted
                   playsInline
-                  onEnded={() => setIsPlaying(false)}
-                  onPause={() => setIsPlaying(false)}
-                  onPlay={() => setIsPlaying(true)}
+                  
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
