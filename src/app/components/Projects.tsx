@@ -2,9 +2,11 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
-const ButteredBread = "/media/Buttered Bread Demo.mp4";
-const PhaserGame = "/media/2D game.mp4";
-const Buzzly = "/media/Buzzly Survey.mp4";
+
+// Use encoded URLs for videos to handle spaces in filenames
+const ButteredBread = "/media/Buttered%20Bread%20Demo.mp4";
+const PhaserGame = "/media/2D%20game.mp4";
+const Buzzly = "/media/Buzzly%20Survey.mp4";
 
 interface Project {
   title: string;
@@ -72,6 +74,7 @@ export default function Projects() {
   const [isScrolling, setIsScrolling] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handlePlayPause = () => {
@@ -80,6 +83,7 @@ export default function Projects() {
       if (video.paused) {
         video.play().catch((error) => {
           console.error("Error attempting to play video:", error);
+          setVideoError(true);
         });
       } else {
         video.pause();
@@ -92,20 +96,51 @@ export default function Projects() {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleVideoPlay = () => setIsPlaying(true);
-    const handleVideoPause = () => setIsPlaying(false);
+    const handleVideoPlay = () => {
+      setIsPlaying(true);
+      setVideoError(false);
+      console.log("Video started playing:", projects[currentIndex].mediaUrl);
+    };
+    
+    const handleVideoPause = () => {
+      setIsPlaying(false);
+      console.log("Video paused:", projects[currentIndex].mediaUrl);
+    };
+    
+    const handleVideoError = (e: Event) => {
+      console.error("Video error occurred for:", projects[currentIndex].mediaUrl, e);
+      setVideoError(true);
+      setIsPlaying(false);
+    };
+    
+    const handleCanPlay = () => {
+      console.log("Video can play:", projects[currentIndex].mediaUrl);
+      setVideoError(false);
+    };
 
+    // Add all event listeners
     video.addEventListener("play", handleVideoPlay);
     video.addEventListener("pause", handleVideoPause);
     video.addEventListener("ended", handleVideoPause);
+    video.addEventListener("error", handleVideoError);
+    video.addEventListener("canplay", handleCanPlay);
+
+    // Force reload the video
+    video.load();
+    
+    // Log video properties for debugging
+    console.log("Current video source:", video.src);
+    console.log("Video ready state:", video.readyState);
 
     // Cleanup listeners
     return () => {
       video.removeEventListener("play", handleVideoPlay);
       video.removeEventListener("pause", handleVideoPause);
       video.removeEventListener("ended", handleVideoPause);
+      video.removeEventListener("error", handleVideoError);
+      video.removeEventListener("canplay", handleCanPlay);
     };
-  }, [currentIndex]); // Re-attach listeners when the project (and thus video src) changes
+  }, [currentIndex, projects]); // Re-attach listeners when the project changes
 
   const paginate = useCallback(
     (newDirection: number) => {
@@ -126,10 +161,12 @@ export default function Projects() {
     [currentIndex, isScrolling]
   );
 
-  // Pause video when switching projects
+  // Reset video state when switching projects
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.pause();
+      setIsPlaying(false);
+      setVideoError(false);
     }
   }, [currentIndex]);
 
@@ -196,9 +233,9 @@ export default function Projects() {
                 onClick={handlePlayPause}
               >
                 <motion.video
-                  key={projects[currentIndex].mediaUrl} // Add key here
+                  key={`video-${currentIndex}-${projects[currentIndex].mediaUrl}`}
                   ref={videoRef}
-                  src={projects[currentIndex].mediaUrl}
+                  src={encodeURI(projects[currentIndex].mediaUrl)}
                   className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -206,29 +243,42 @@ export default function Projects() {
                   loop
                   muted
                   playsInline
+                  controls
+                  preload="metadata"
+                  onError={(e) => {
+                    console.error("Video error event:", e);
+                    setVideoError(true);
+                  }}
+                  onCanPlay={() => setVideoError(false)}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
-                    {!isPlaying ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="white"
-                        viewBox="0 0 24 24"
-                        className="w-16 h-16"
-                      >
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="white"
-                        viewBox="0 0 24 24"
-                        className="w-16 h-16"
-                      >
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                      </svg>
-                    )}
-                  </div>
+                  {videoError ? (
+                    <div className="bg-black bg-opacity-70 p-4 rounded-lg text-white">
+                      Error loading video. Please check if the file exists.
+                    </div>
+                  ) : (
+                    <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
+                      {!isPlaying ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="white"
+                          viewBox="0 0 24 24"
+                          className="w-16 h-16"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="white"
+                          viewBox="0 0 24 24"
+                          className="w-16 h-16"
+                        >
+                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                        </svg>
+                      )}
+                    </div>
+                  )}
                 </div>
               </button>
             ) : (

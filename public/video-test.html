@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Test Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .video-container {
+      margin-bottom: 30px;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    video {
+      max-width: 100%;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Video Test Page</h1>
+  <p>This page tests direct playback of the MP4 files used in the Projects component.</p>
+  
+  <div class="video-container">
+    <h2>Buttered Bread Demo</h2>
+    <video controls width="640" preload="metadata" src="/media/Buttered Bread Demo.mp4"></video>
+  </div>
+  
+  <div class="video-container">
+    <h2>2D Game</h2>
+    <video controls width="640" preload="metadata" src="/media/2D game.mp4"></video>
+  </div>
+  
+  <div class="video-container">
+    <h2>Buzzly Survey</h2>
+    <video controls width="640" preload="metadata" src="/media/Buzzly Survey.mp4"></video>
+  </div>
+
+  <script>
+    // Add event listeners to log any errors
+    document.querySelectorAll('video').forEach(video => {
+      video.addEventListener('error', function(e) {
+        console.error('Video error:', this.src, e);
+      });
+      
+      video.addEventListener('canplay', function() {
+        console.log('Video can play:', this.src);
+      });
+    });
+  </script>
+</body>
+</html>
