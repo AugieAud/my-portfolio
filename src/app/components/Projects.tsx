@@ -20,10 +20,45 @@ const projects: Project[] = [
     type: "video",
   },
   {
-    title: "Project 2",
-    description:
-      "Description of project 2. Replace this with your actual project description.",
-    mediaUrl: "/project2.jpg",
+    title: "Placeholder Title 2D Game",
+    description: "Placeholder description for 2D Game. Please replace.",
+    mediaUrl: "/media/2D game.mov",
+    type: "video",
+  },
+  {
+    title: "Placeholder Title Buzzly Survey",
+    description: "Placeholder description for Buzzly Survey. Please replace.",
+    mediaUrl: "/media/Buzzly Survey.mov",
+    type: "video",
+  },
+  {
+    title: "Placeholder Title CLI Tool",
+    description: "Placeholder description for CLI Tool. Please replace.",
+    mediaUrl: "/media/CLI tool.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Car ID App",
+    description: "Placeholder description for Car ID App. Please replace.",
+    mediaUrl: "/media/Car ID app.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Car Insurance",
+    description: "Placeholder description for Car Insurance. Please replace.",
+    mediaUrl: "/media/Car Insurance.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Marketing Association NZ",
+    description: "Placeholder description for Marketing Association NZ. Please replace.",
+    mediaUrl: "/media/Marketing Association NZ.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Mock Job Interview",
+    description: "Placeholder description for Mock Job Interview. Please replace.",
+    mediaUrl: "/media/Mock job Interview.png",
     type: "image",
   },
 ];
