@@ -70,6 +70,21 @@ export default function Projects() {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("Error attempting to play video:", error);
+          });
+        }
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  };
+
   const paginate = useCallback(
     (newDirection: number) => {
       if (isScrolling) return;
@@ -156,17 +171,7 @@ export default function Projects() {
             {projects[currentIndex].type === "video" ? (
               <button 
                 className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
-                onClick={() => {
-                  if (videoRef.current) {
-                    if (videoRef.current.paused) {
-                      videoRef.current.play();
-                      setIsPlaying(true);
-                    } else {
-                      videoRef.current.pause();
-                      setIsPlaying(false);
-                    }
-                  }
-                }}
+                onClick={handlePlayPause}
               >
                 <motion.video
                   ref={videoRef}
