@@ -87,24 +87,48 @@ export default function Projects() {
   const [isPlaying, setIsPlaying] = useState<boolean[]>(projects.map(() => false));
   const [videoError, setVideoError] = useState(false);
   const [useFallback, setUseFallback] = useState<boolean[]>(projects.map(() => false));
+  const [videoLoaded, setVideoLoaded] = useState<boolean[]>(projects.map(() => false));
   const videoRefs = useRef<(HTMLVideoElement | null)[]>(projects.map(() => null));
 
   const handlePlayPause = () => {
     const video = videoRefs.current[currentIndex];
-    if (video) {
+    if (!video) return;
+    
+    console.log("Play/Pause clicked. Video paused state:", video.paused, "Video loaded:", videoLoaded[currentIndex]);
+    
+    // Only attempt to play if the video is loaded
+    if (videoLoaded[currentIndex]) {
       if (video.paused) {
-        video.play().catch((error) => {
-          console.error("Error attempting to play video:", error);
-          setVideoError(true);
-          
-          // Set fallback for this specific video
-          const newUseFallback = [...useFallback];
-          newUseFallback[currentIndex] = true;
-          setUseFallback(newUseFallback);
-        });
+        // Force play and update UI state
+        const playPromise = video.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            console.log("Video playback started successfully");
+            // Update playing state
+            const newIsPlaying = [...isPlaying];
+            newIsPlaying[currentIndex] = true;
+            setIsPlaying(newIsPlaying);
+          }).catch((error) => {
+            console.error("Error attempting to play video:", error);
+            setVideoError(true);
+            
+            // Set fallback for this specific video
+            const newUseFallback = [...useFallback];
+            newUseFallback[currentIndex] = true;
+            setUseFallback(newUseFallback);
+          });
+        }
       } else {
+        // Force pause and update UI state
         video.pause();
+        const newIsPlaying = [...isPlaying];
+        newIsPlaying[currentIndex] = false;
+        setIsPlaying(newIsPlaying);
+        console.log("Video paused manually");
       }
+    } else {
+      console.log("Video not loaded yet, can't play");
     }
   };
 
@@ -112,9 +136,10 @@ export default function Projects() {
   useEffect(() => {
     setVideoError(false);
     
-    // Pause all videos except the current one
+    // Pause all videos
     videoRefs.current.forEach((video, index) => {
-      if (video && index !== currentIndex) {
+      if (video) {
+        // Always pause videos when switching
         video.pause();
         
         // Update playing state
@@ -124,14 +149,14 @@ export default function Projects() {
       }
     });
     
-    // Try to play the current video if it was previously playing
-    const currentVideo = videoRefs.current[currentIndex];
-    if (currentVideo && isPlaying[currentIndex] && !useFallback[currentIndex]) {
-      currentVideo.play().catch(error => {
-        console.error("Failed to play video after switching:", error);
-      });
-    }
-  }, [currentIndex, isPlaying, useFallback]);
+    // Reset the loaded state for the current video
+    const newVideoLoaded = [...videoLoaded];
+    newVideoLoaded[currentIndex] = false;
+    setVideoLoaded(newVideoLoaded);
+    
+    // We'll let the video load first before attempting to play
+    // This is handled in the onCanPlay event handler
+  }, [currentIndex]);
 
   // Effect to set up video event listeners for the current video
   useEffect(() => {
@@ -303,8 +328,7 @@ export default function Projects() {
                   loop
                   muted
                   playsInline
-                  controls
-                  preload="metadata"
+                  preload="auto"
                   onError={(e) => {
                     console.error("Video error event:", e);
                     setVideoError(true);
@@ -317,6 +341,34 @@ export default function Projects() {
                   onCanPlay={() => {
                     setVideoError(false);
                     console.log("Video can play successfully:", projects[currentIndex].mediaUrl);
+                    
+                    // Mark this video as loaded
+                    const newVideoLoaded = [...videoLoaded];
+                    newVideoLoaded[currentIndex] = true;
+                    setVideoLoaded(newVideoLoaded);
+                    
+                    // Only try to auto-play the first video on initial load
+                    if (currentIndex === 0 && !isPlaying.some(playing => playing)) {
+                      const video = videoRefs.current[currentIndex];
+                      if (video) {
+                        // Small delay to ensure video is fully ready
+                        setTimeout(() => {
+                          video.play().catch(err => console.log("Auto-play prevented:", err));
+                        }, 100);
+                      }
+                    }
+                  }}
+                  onPlay={() => {
+                    console.log("onPlay event fired");
+                    const newIsPlaying = [...isPlaying];
+                    newIsPlaying[currentIndex] = true;
+                    setIsPlaying(newIsPlaying);
+                  }}
+                  onPause={() => {
+                    console.log("onPause event fired");
+                    const newIsPlaying = [...isPlaying];
+                    newIsPlaying[currentIndex] = false;
+                    setIsPlaying(newIsPlaying);
                   }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
