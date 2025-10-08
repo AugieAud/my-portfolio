@@ -31,7 +31,7 @@ export default function Contact() {
         Get in Touch
       </motion.h2>
       <motion.p
-        className="text-gray-600 mb-4"
+        className="text-foreground opacity-80 mb-4"
         variants={itemVariants}
         transition={{ delay: 0.3, duration: 0.5 }}
       >

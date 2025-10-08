@@ -23,7 +23,7 @@ export default function Info() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="text-gray-600 leading-relaxed"
+        className="text-foreground leading-relaxed opacity-80"
       >
         I am a full stack developer passionate about building beautiful and
         functional web experiences. With expertise in modern web technologies, I

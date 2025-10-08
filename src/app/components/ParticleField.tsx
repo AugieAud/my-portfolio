@@ -71,7 +71,8 @@ function ParticleSystem({
     if (!mesh.current) return;
 
     const time = state.clock.getElapsedTime();
-    const positions = mesh.current.geometry.attributes.position;
+    const positionsAttr = mesh.current.geometry.attributes.position;
+    const positionsArray = positionsAttr.array as Float32Array;
     const mouseX = (mouse.current[0] / window.innerWidth) * 2 - 1;
     const mouseY = -(mouse.current[1] / window.innerHeight) * 2 + 1;
 
@@ -79,9 +80,9 @@ function ParticleSystem({
       const i3 = i * 3;
 
       // Current position
-      const x = positions.array[i3];
-      const y = positions.array[i3 + 1];
-      const z = positions.array[i3 + 2];
+      const x = positionsArray[i3];
+      const y = positionsArray[i3 + 1];
+      const z = positionsArray[i3 + 2];
 
       // Create flowing streams
       const streamFreq = 0.15;
@@ -138,12 +139,12 @@ function ParticleSystem({
       }
 
       // Update positions
-      positions.array[i3] += velocities[i3];
-      positions.array[i3 + 1] += velocities[i3 + 1];
-      positions.array[i3 + 2] += velocities[i3 + 2];
+      positionsArray[i3] += velocities[i3];
+      positionsArray[i3 + 1] += velocities[i3 + 1];
+      positionsArray[i3 + 2] += velocities[i3 + 2];
     }
 
-    positions.needsUpdate = true;
+    positionsAttr.needsUpdate = true;
   });
 
   return (
