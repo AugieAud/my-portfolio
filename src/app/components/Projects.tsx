@@ -94,8 +94,6 @@ export default function Projects() {
     const video = videoRefs.current[currentIndex];
     if (!video) return;
     
-    console.log("Play/Pause clicked. Video paused state:", video.paused, "Video loaded:", videoLoaded[currentIndex]);
-    
     // Only attempt to play if the video is loaded
     if (videoLoaded[currentIndex]) {
       if (video.paused) {
@@ -104,13 +102,11 @@ export default function Projects() {
         
         if (playPromise !== undefined) {
           playPromise.then(() => {
-            console.log("Video playback started successfully");
             // Update playing state
             const newIsPlaying = [...isPlaying];
             newIsPlaying[currentIndex] = true;
             setIsPlaying(newIsPlaying);
-          }).catch((error) => {
-            console.error("Error attempting to play video:", error);
+          }).catch(() => {
             setVideoError(true);
             
             // Set fallback for this specific video
@@ -125,10 +121,7 @@ export default function Projects() {
         const newIsPlaying = [...isPlaying];
         newIsPlaying[currentIndex] = false;
         setIsPlaying(newIsPlaying);
-        console.log("Video paused manually");
       }
-    } else {
-      console.log("Video not loaded yet, can't play");
     }
   };
 
@@ -176,18 +169,15 @@ export default function Projects() {
       newIsPlaying[currentIndex] = true;
       setIsPlaying(newIsPlaying);
       setVideoError(false);
-      console.log("Video started playing:", projects[currentIndex].mediaUrl);
     };
     
     const handleVideoPause = () => {
       const newIsPlaying = [...isPlaying];
       newIsPlaying[currentIndex] = false;
       setIsPlaying(newIsPlaying);
-      console.log("Video paused:", projects[currentIndex].mediaUrl);
     };
     
     const handleVideoError = (e: Event) => {
-      console.error("Video error occurred for:", projects[currentIndex].mediaUrl, e);
       setVideoError(true);
       
       // Update the playing state for the current video
@@ -202,7 +192,6 @@ export default function Projects() {
     };
     
     const handleCanPlay = () => {
-      console.log("Video can play:", projects[currentIndex].mediaUrl);
       setVideoError(false);
     };
 
@@ -213,14 +202,8 @@ export default function Projects() {
     video.addEventListener("error", handleVideoError);
     video.addEventListener("canplay", handleCanPlay);
 
-    // Force reload the video and log the current source
+    // Force reload the video
     video.load();
-    console.log("Current video source:", video.src);
-    console.log("Video ready state:", video.readyState);
-    
-    // Log video properties for debugging
-    console.log("Current video source:", video.src);
-    console.log("Video ready state:", video.readyState);
 
     // Clean up event listeners
     return () => {
@@ -250,10 +233,6 @@ export default function Projects() {
     },
     [currentIndex, isScrolling]
   );
-
-  // This effect is now redundant since we handle video state in the earlier useEffect
-  // Removing this to avoid duplicate functionality
-  // The video state reset is now handled in the more comprehensive useEffect above
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -329,8 +308,7 @@ export default function Projects() {
                   muted
                   playsInline
                   preload="auto"
-                  onError={(e) => {
-                    console.error("Video error event:", e);
+                  onError={() => {
                     setVideoError(true);
                     
                     // Set fallback for this specific video
@@ -340,7 +318,6 @@ export default function Projects() {
                   }}
                   onCanPlay={() => {
                     setVideoError(false);
-                    console.log("Video can play successfully:", projects[currentIndex].mediaUrl);
                     
                     // Mark this video as loaded
                     const newVideoLoaded = [...videoLoaded];
@@ -353,19 +330,17 @@ export default function Projects() {
                       if (video) {
                         // Small delay to ensure video is fully ready
                         setTimeout(() => {
-                          video.play().catch(err => console.log("Auto-play prevented:", err));
+                          video.play().catch(() => {});
                         }, 100);
                       }
                     }
                   }}
                   onPlay={() => {
-                    console.log("onPlay event fired");
                     const newIsPlaying = [...isPlaying];
                     newIsPlaying[currentIndex] = true;
                     setIsPlaying(newIsPlaying);
                   }}
                   onPause={() => {
-                    console.log("onPause event fired");
                     const newIsPlaying = [...isPlaying];
                     newIsPlaying[currentIndex] = false;
                     setIsPlaying(newIsPlaying);
