@@ -141,19 +141,32 @@ export default function Projects() {
 
   useEffect(() => {
     setVideoError(false);
+    // Pause all non-current videos; leave current slide's video alone
     videoRefs.current.forEach((video, index) => {
-      if (video) {
+      if (!video) return;
+      if (index !== currentIndex) {
         video.pause();
         const newIsPlaying = [...isPlaying];
         newIsPlaying[index] = false;
         setIsPlaying(newIsPlaying);
       }
     });
-
-    const newVideoLoaded = [...videoLoaded];
-    newVideoLoaded[currentIndex] = false;
-    setVideoLoaded(newVideoLoaded);
   }, [currentIndex]);
+
+  // Auto-play the current slide's video when it is loaded and the slide becomes active
+  useEffect(() => {
+    const video = videoRefs.current[currentIndex];
+    if (!video) return;
+    if (projects[currentIndex].type !== "video") return;
+    if (useFallback[currentIndex]) return;
+    // If metadata already loaded (readyState >= 3), try to play immediately
+    if (video.readyState >= 3) {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    }
+  }, [currentIndex, videoLoaded[currentIndex], useFallback[currentIndex]]);
 
   const paginate = useCallback(
     (newDirection: number) => {
@@ -253,6 +266,7 @@ export default function Projects() {
                     transition={{ delay: 0.2 }}
                     loop
                     muted
+                    autoPlay
                     playsInline
                     preload="auto"
                     onError={() => {
@@ -266,14 +280,15 @@ export default function Projects() {
                       const newVideoLoaded = [...videoLoaded];
                       newVideoLoaded[currentIndex] = true;
                       setVideoLoaded(newVideoLoaded);
-                      
-                      if (currentIndex === 0 && !isPlaying.some(playing => playing)) {
-                        const video = videoRefs.current[currentIndex];
-                        if (video) {
-                          setTimeout(() => {
-                            video.play().catch(() => {});
-                          }, 100);
-                        }
+                      // Attempt to auto-play the current video's slide when ready
+                      const video = videoRefs.current[currentIndex];
+                      if (video && projects[currentIndex].type === "video" && !useFallback[currentIndex]) {
+                        setTimeout(() => {
+                          const playPromise = video.play();
+                          if (playPromise !== undefined) {
+                            playPromise.catch(() => {});
+                          }
+                        }, 100);
                       }
                     }}
                     onPlay={() => {
