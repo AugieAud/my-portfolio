@@ -6,13 +6,15 @@ import { TypeAnimation } from "react-type-animation";
 export default function Home() {
   return (
     <motion.div
-      className="flex items-center justify-center h-screen w-full"
+      className="flex h-screen w-full"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="text-center space-y-6 px-8">
+      <div className="flex-1"></div> {/* This will push content to the right */}
+      <div className="flex items-center justify-center w-full max-w-4xl px-8">
+        <div className="space-y-6 w-full">
         <motion.h1
           className="text-6xl md:text-8xl font-sans font-bold text-foreground"
           initial={{ y: 20, opacity: 0 }}
@@ -41,14 +43,14 @@ export default function Home() {
             repeat={Infinity}
           />
         </motion.div>
-        <motion.p
-          className="text-lg text-foreground opacity-80 max-w-2xl mx-auto"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-        >
-          Building beautiful and functional web experiences with modern technologies
-        </motion.p>
+          <motion.p
+            className="text-lg text-foreground opacity-80 max-w-2xl mx-auto"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+          >
+          </motion.p>
+        </div>
       </div>
     </motion.div>
   );
