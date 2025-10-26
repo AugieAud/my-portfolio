@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // Define video paths and fallback images
+const ButlerBurgers = "/media/Butlerburger.mov";
 const ButteredBread = "/media/Buttered Bread Demo.mp4";
 const PhaserGame = "/media/2D game.mp4";
 const Buzzly = "/media/Buzzly Survey.mp4";
@@ -28,7 +29,7 @@ const projects: Project[] = [
     {
     title: "Butler Burgers",
     description: "Designed and built for an American based burger restaurant. I worked closely with the client, communicating across timezones, to create a website that reflected their vision. I created the logo using Inkscape and was resposible for the planning, development, revisions and deployment on Netlify. Built using Javascript, HTML and Bootstrap.",
-    mediaUrl: Buzzly,
+    mediaUrl: ButlerBurgers,
     type: "video",
     fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
   },
@@ -131,6 +132,18 @@ export default function Projects() {
     const newVideoLoaded = [...videoLoaded];
     newVideoLoaded[currentIndex] = false;
     setVideoLoaded(newVideoLoaded);
+  }, [currentIndex]);
+
+  // Attempt to autoplay when the current project changes and the video is ready
+  useEffect(() => {
+    const video = videoRefs.current[currentIndex];
+    if (!video) return;
+    // If the browser already considers it ready, try to play immediately
+    if (video.readyState >= 3) {
+      setTimeout(() => {
+        video.play().catch(() => {});
+      }, 100);
+    }
   }, [currentIndex]);
 
   const paginate = useCallback(
@@ -258,14 +271,12 @@ export default function Projects() {
                       const newVideoLoaded = [...videoLoaded];
                       newVideoLoaded[currentIndex] = true;
                       setVideoLoaded(newVideoLoaded);
-                      
-                      if (currentIndex === 0 && !isPlaying.some(playing => playing)) {
-                        const video = videoRefs.current[currentIndex];
-                        if (video) {
-                          setTimeout(() => {
-                            video.play().catch(() => {});
-                          }, 100);
-                        }
+                      // Always try to autoplay the current slide when it can play
+                      const video = videoRefs.current[currentIndex];
+                      if (video) {
+                        setTimeout(() => {
+                          video.play().catch(() => {});
+                        }, 100);
                       }
                     }}
                     onPlay={() => {
