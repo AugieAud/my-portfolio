@@ -64,17 +64,18 @@ export default function Projects() {
   const [useFallback, setUseFallback] = useState<boolean[]>(projects.map(() => false));
   const [videoLoaded, setVideoLoaded] = useState<boolean[]>(projects.map(() => false));
   const videoRefs = useRef<(HTMLVideoElement | null)[]>(projects.map(() => null));
+  const totalSlides = projects.length + 1; // extra slide for GitHub CTA
 
   // Navigation handlers
   const goToNext = useCallback(() => {
-    const nextIndex = (currentIndex + 1) % projects.length;
+    const nextIndex = (currentIndex + 1) % totalSlides;
     setPage([nextIndex, 1]);
-  }, [currentIndex, isPlaying, videoLoaded]);
+  }, [currentIndex, totalSlides]);
 
   const goToPrev = useCallback(() => {
-    const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
+    const prevIndex = (currentIndex - 1 + totalSlides) % totalSlides;
     setPage([prevIndex, -1]);
-  }, [currentIndex]);
+  }, [currentIndex, totalSlides]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -130,15 +131,17 @@ export default function Projects() {
     });
 
     const newVideoLoaded = [...videoLoaded];
-    newVideoLoaded[currentIndex] = false;
-    setVideoLoaded(newVideoLoaded);
+    if (currentIndex < projects.length) {
+      newVideoLoaded[currentIndex] = false;
+      setVideoLoaded(newVideoLoaded);
+    }
   }, [currentIndex]);
 
   // Attempt to autoplay when the current project changes and the video is ready
   useEffect(() => {
+    if (currentIndex >= projects.length) return;
     const video = videoRefs.current[currentIndex];
     if (!video) return;
-    // If the browser already considers it ready, try to play immediately
     if (video.readyState >= 3) {
       setTimeout(() => {
         video.play().catch(() => {});
@@ -151,7 +154,7 @@ export default function Projects() {
       if (isScrolling) return;
       setIsScrolling(true);
       const nextIndex = currentIndex + newDirection;
-      if (nextIndex >= 0 && nextIndex < projects.length) {
+      if (nextIndex >= 0 && nextIndex < totalSlides) {
         setPage([nextIndex, newDirection]);
         setTimeout(() => {
           setIsScrolling(false);
@@ -160,7 +163,7 @@ export default function Projects() {
         setIsScrolling(false);
       }
     },
-    [currentIndex, isScrolling]
+    [currentIndex, isScrolling, totalSlides]
   );
 
   // Use paginate in the keyboard navigation
@@ -242,122 +245,148 @@ export default function Projects() {
             }}
             className="absolute inset-0 flex flex-col md:flex-row items-center justify-center p-8 gap-8"
           >
-            <div className="md:w-2/3 h-full flex items-center justify-center">
-              {projects[currentIndex].type === "video" && !useFallback[currentIndex] ? (
-                <button
-                  className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
-                  onClick={handlePlayPause}
-                >
-                  <motion.video
-                    key={`video-${currentIndex}-${projects[currentIndex].mediaUrl}`}
-                    ref={el => { videoRefs.current[currentIndex] = el; }}
-                    src={projects[currentIndex].mediaUrl}
-                    className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    onError={() => {
-                      setVideoError(true);
-                      const newUseFallback = [...useFallback];
-                      newUseFallback[currentIndex] = true;
-                      setUseFallback(newUseFallback);
-                    }}
-                    onCanPlay={() => {
-                      setVideoError(false);
-                      const newVideoLoaded = [...videoLoaded];
-                      newVideoLoaded[currentIndex] = true;
-                      setVideoLoaded(newVideoLoaded);
-                      // Always try to autoplay the current slide when it can play
-                      const video = videoRefs.current[currentIndex];
-                      if (video) {
-                        setTimeout(() => {
-                          video.play().catch(() => {});
-                        }, 100);
-                      }
-                    }}
-                    onPlay={() => {
-                      const newIsPlaying = [...isPlaying];
-                      newIsPlaying[currentIndex] = true;
-                      setIsPlaying(newIsPlaying);
-                    }}
-                    onPause={() => {
-                      const newIsPlaying = [...isPlaying];
-                      newIsPlaying[currentIndex] = false;
-                      setIsPlaying(newIsPlaying);
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {videoError ? (
-                      <div className="bg-black bg-opacity-70 p-4 rounded-lg text-white">
-                        Error loading video. Switching to fallback image...
-                      </div>
-                    ) : (
-                      <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
-                        {!isPlaying[currentIndex] ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="white"
-                            viewBox="0 0 24 24"
-                            className="w-16 h-16"
-                          >
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
+            {currentIndex < projects.length ? (
+              <>
+                <div className="md:w-2/3 h-full flex items-center justify-center">
+                  {projects[currentIndex].type === "video" && !useFallback[currentIndex] ? (
+                    <button
+                      className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
+                      onClick={handlePlayPause}
+                    >
+                      <motion.video
+                        key={`video-${currentIndex}-${projects[currentIndex].mediaUrl}`}
+                        ref={el => { videoRefs.current[currentIndex] = el; }}
+                        src={projects[currentIndex].mediaUrl}
+                        className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        onError={() => {
+                          setVideoError(true);
+                          const newUseFallback = [...useFallback];
+                          newUseFallback[currentIndex] = true;
+                          setUseFallback(newUseFallback);
+                        }}
+                        onCanPlay={() => {
+                          setVideoError(false);
+                          const newVideoLoaded = [...videoLoaded];
+                          newVideoLoaded[currentIndex] = true;
+                          setVideoLoaded(newVideoLoaded);
+                          // Always try to autoplay the current slide when it can play
+                          const video = videoRefs.current[currentIndex];
+                          if (video) {
+                            setTimeout(() => {
+                              video.play().catch(() => {});
+                            }, 100);
+                          }
+                        }}
+                        onPlay={() => {
+                          const newIsPlaying = [...isPlaying];
+                          newIsPlaying[currentIndex] = true;
+                          setIsPlaying(newIsPlaying);
+                        }}
+                        onPause={() => {
+                          const newIsPlaying = [...isPlaying];
+                          newIsPlaying[currentIndex] = false;
+                          setIsPlaying(newIsPlaying);
+                        }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {videoError ? (
+                          <div className="bg-black bg-opacity-70 p-4 rounded-lg text-white">
+                            Error loading video. Switching to fallback image...
+                          </div>
                         ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="white"
-                            viewBox="0 0 24 24"
-                            className="w-16 h-16"
-                          >
-                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                          </svg>
+                          <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
+                            {!isPlaying[currentIndex] ? (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="white"
+                                viewBox="0 0 24 24"
+                                className="w-16 h-16"
+                              >
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="white"
+                                viewBox="0 0 24 24"
+                                className="w-16 h-16"
+                              >
+                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                              </svg>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                </button>
-              ) : (
-                <motion.img
-                  src={projects[currentIndex].type === "video" && useFallback[currentIndex] && projects[currentIndex].fallbackImage 
-                    ? projects[currentIndex].fallbackImage 
-                    : projects[currentIndex].mediaUrl}
-                  alt={projects[currentIndex].title}
-                  className="w-full h-[400px] object-cover rounded-lg shadow-lg"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
+                    </button>
+                  ) : (
+                    <motion.img
+                      src={projects[currentIndex].type === "video" && useFallback[currentIndex] && projects[currentIndex].fallbackImage 
+                        ? projects[currentIndex].fallbackImage 
+                        : projects[currentIndex].mediaUrl}
+                      alt={projects[currentIndex].title}
+                      className="w-full h-[400px] object-cover rounded-lg shadow-lg"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    />
+                  )}
+                </div>
+                <div className="md:w-1/3 flex flex-col justify-center space-y-4 text-center md:text-left">
+                  <motion.h3
+                    className="text-3xl font-semibold mb-6"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    {projects[currentIndex].title}
+                  </motion.h3>
+                  <motion.p
+                    className="text-foreground text-xl"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    {projects[currentIndex].description}
+                  </motion.p>
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-center">
+                <motion.h3
+                  className="text-3xl font-semibold mb-6"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                />
-              )}
-            </div>
-            <div className="md:w-1/3 flex flex-col justify-center space-y-4 text-center md:text-left">
-              <motion.h3
-                className="text-3xl font-semibold mb-6"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                {projects[currentIndex].title}
-              </motion.h3>
-              <motion.p
-                className="text-foreground text-xl"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                {projects[currentIndex].description}
-              </motion.p>
-            </div>
+                >
+                  See what else I've been up to on GitHub
+                </motion.h3>
+                <motion.a
+                  href="https://github.com/AugieAud"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-lg bg-white text-black font-medium shadow hover:shadow-lg transition"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  Visit my GitHub
+                </motion.a>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </motion.div>
 
       {/* Dots indicator */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
-        {projects.map((_, index) => (
+        {Array.from({ length: totalSlides }).map((_, index) => (
           <button
             key={index}
             onClick={() => {
@@ -370,7 +399,7 @@ export default function Projects() {
                 ? "bg-white w-6"
                 : "bg-gray-400 hover:bg-gray-200"
             }`}
-            aria-label={`Go to project ${index + 1}`}
+            aria-label={index < projects.length ? `Go to project ${index + 1}` : "Go to GitHub slide"}
           />
         ))}
       </div>
