@@ -35,7 +35,7 @@ export default function Home() {
               2000,
               "Creative Problem Solver",
               2000,
-              "Web Enthusiast",
+              "Avid Runner and Sourdough Baker",
               2000,
             ]}
             wrapper="span"

@@ -15,7 +15,7 @@ export default function Navbar({
   const { theme, setTheme } = useTheme();
 
   return (
-    <aside className="w-1/4 p-8 border-r border-gray-300 dark:border-gray-700 flex flex-col justify-between">
+    <aside className="w-1/5 p-6 border-r border-gray-300 dark:border-gray-700 flex flex-col justify-between">
       <div>
         <h1
           className="text-4xl font-sans tracking-wide leading-none cursor-pointer text-foreground hover:opacity-80 transition-colors"
