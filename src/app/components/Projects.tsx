@@ -24,6 +24,21 @@ interface Project {
 }
 
 const projects: Project[] = [
+
+    {
+    title: "Butler Burgers",
+    description: "Designed and built for an American based burger restaurant. I worked closely with the client, communicating across timezones, to create a website that reflected their vision. I created the logo using Inkscape and was resposible for the planning, development, revisions and deployment on Netlify. Built using Javascript, HTML and Bootstrap.",
+    mediaUrl: Buzzly,
+    type: "video",
+    fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
+  },
+    {
+    title: "Buzzly Sponsor Dashboard",
+    description: "This was for my internship at Buzzly, a New Zealand based company. I was responsible for creating part of the sponsor dashboard, building user authentication and creating a survey builder. Built using React, Typescript, AWS and Strapi CMS.",
+    mediaUrl: Buzzly,
+    type: "video",
+    fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
+  },
   {
     title: "Buttered Bread",
     description: "My first ever coding project, a website dedicated to my love of sourdough bread. Built using HTML, CSS and vanilla JavaScript. Lot's of room for growth and improvement here but I love the vibe I was going for and it's a great starting point for my journey into web development",
@@ -37,43 +52,6 @@ const projects: Project[] = [
     mediaUrl: PhaserGame,
     type: "video",
     fallbackImage: fallbackImages["Placeholder Title 2D Game"],
-  },
-  {
-    title: "Placeholder Title Buzzly Survey",
-    description: "Placeholder description for Buzzly Survey. Please replace.",
-    mediaUrl: Buzzly,
-    type: "video",
-    fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
-  },
-  {
-    title: "Placeholder Title CLI Tool",
-    description: "Placeholder description for CLI Tool. Please replace.",
-    mediaUrl: "/media/CLI tool.png",
-    type: "image",
-  },
-  {
-    title: "Placeholder Title Car ID App",
-    description: "Placeholder description for Car ID App. Please replace.",
-    mediaUrl: "/media/Car ID app.png",
-    type: "image",
-  },
-  {
-    title: "Placeholder Title Car Insurance",
-    description: "Placeholder description for Car Insurance. Please replace.",
-    mediaUrl: "/media/Car Insurance.png",
-    type: "image",
-  },
-  {
-    title: "Placeholder Title Marketing Association NZ",
-    description: "Placeholder description for Marketing Association NZ. Please replace.",
-    mediaUrl: "/media/Marketing Association NZ.png",
-    type: "image",
-  },
-  {
-    title: "Placeholder Title Mock Job Interview",
-    description: "Placeholder description for Mock Job Interview. Please replace.",
-    mediaUrl: "/media/Mock job Interview.png",
-    type: "image",
   },
 ];
 
