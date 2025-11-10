@@ -6,7 +6,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // Define video paths and fallback images
 const ButlerBurgers = "/media/Butlerburger.mov";
 const ButteredBread = "/media/Buttered Bread Demo.mp4";
-const PhaserGame = "/media/2D game.mp4";
 const Buzzly = "/media/Buzzly Survey.mp4";
 
 // Fallback images in case videos fail to load
@@ -46,13 +45,6 @@ const projects: Project[] = [
     mediaUrl: ButteredBread,
     type: "video",
     fallbackImage: fallbackImages["Buttered Bread"],
-  },
-  {
-    title: "Phaser Ping Pong Game",
-    description: "Playing around with phaser and have made this simple pong game. Built using HTML, CSS and vanilla JavaScript.",
-    mediaUrl: PhaserGame,
-    type: "video",
-    fallbackImage: fallbackImages["Placeholder Title 2D Game"],
   },
 ];
 
