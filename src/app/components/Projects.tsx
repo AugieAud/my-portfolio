@@ -131,7 +131,7 @@ export default function Projects() {
         return copy;
       });
     }
-  }, [currentIndex, projects.length]);
+  }, [currentIndex]);
 
   // Attempt to autoplay when the current project changes and the video is ready
   useEffect(() => {
