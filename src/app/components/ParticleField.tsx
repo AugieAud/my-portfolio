@@ -18,7 +18,6 @@ function ParticleSystem({
   isMouseInCanvas,
 }: ParticleProps) {
   const mesh = useRef<THREE.Points>(null);
-  const hover = useRef(false);
 
   // Create particles
   const particleData = useMemo(() => {

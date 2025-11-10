@@ -90,7 +90,7 @@ export default function Projects() {
   const goToNext = useCallback(() => {
     const nextIndex = (currentIndex + 1) % projects.length;
     setPage([nextIndex, 1]);
-  }, [currentIndex, isPlaying, videoLoaded]);
+  }, [currentIndex]);
 
   const goToPrev = useCallback(() => {
     const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
@@ -141,18 +141,18 @@ export default function Projects() {
 
   useEffect(() => {
     setVideoError(false);
-    videoRefs.current.forEach((video, index) => {
+    videoRefs.current.forEach((video) => {
       if (video) {
         video.pause();
-        const newIsPlaying = [...isPlaying];
-        newIsPlaying[index] = false;
-        setIsPlaying(newIsPlaying);
       }
     });
 
-    const newVideoLoaded = [...videoLoaded];
-    newVideoLoaded[currentIndex] = false;
-    setVideoLoaded(newVideoLoaded);
+    setIsPlaying((prev) => prev.map(() => false));
+    setVideoLoaded((prev) => {
+      const next = [...prev];
+      next[currentIndex] = false;
+      return next;
+    });
   }, [currentIndex]);
 
   const paginate = useCallback(
