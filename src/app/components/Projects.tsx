@@ -6,13 +6,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // Define video paths and fallback images
 const ButlerBurgers = "/media/Butlerburger.mov";
 const ButteredBread = "/media/Buttered Bread Demo.mp4";
-const PhaserGame = "/media/2D game.mp4";
 const Buzzly = "/media/Buzzly Survey.mp4";
 
 // Fallback images in case videos fail to load
 const fallbackImages = {
   "Buttered Bread": "/media/Car Insurance.png",
-  "Placeholder Title 2D Game": "/media/CLI tool.png",
   "Placeholder Title Buzzly Survey": "/media/Car ID app.png"
 };
 
@@ -25,15 +23,14 @@ interface Project {
 }
 
 const projects: Project[] = [
-
-    {
+  {
     title: "Butler Burgers",
     description: "Designed and built for an American based burger restaurant. I worked closely with the client, communicating across timezones, to create a website that reflected their vision. I created the logo using Inkscape and was resposible for the planning, development, revisions and deployment on Netlify. Built using Javascript, HTML and Bootstrap.",
     mediaUrl: ButlerBurgers,
     type: "video",
     fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
   },
-    {
+  {
     title: "Buzzly Sponsor Dashboard",
     description: "This was for my internship at Buzzly, a New Zealand based company. I was responsible for creating part of the sponsor dashboard, building user authentication and creating a survey builder. Built using React, Typescript, AWS and Strapi CMS.",
     mediaUrl: Buzzly,
@@ -46,13 +43,6 @@ const projects: Project[] = [
     mediaUrl: ButteredBread,
     type: "video",
     fallbackImage: fallbackImages["Buttered Bread"],
-  },
-  {
-    title: "Phaser Ping Pong Game",
-    description: "Playing around with phaser and have made this simple pong game. Built using HTML, CSS and vanilla JavaScript.",
-    mediaUrl: PhaserGame,
-    type: "video",
-    fallbackImage: fallbackImages["Placeholder Title 2D Game"],
   },
 ];
 
@@ -112,9 +102,11 @@ export default function Projects() {
         }
       } else {
         video.pause();
-        const newIsPlaying = [...isPlaying];
-        newIsPlaying[currentIndex] = false;
-        setIsPlaying(newIsPlaying);
+        setIsPlaying((prev) => {
+          const newIsPlaying = [...prev];
+          newIsPlaying[currentIndex] = false;
+          return newIsPlaying;
+        });
       }
     }
   };
@@ -124,18 +116,22 @@ export default function Projects() {
     videoRefs.current.forEach((video, index) => {
       if (video) {
         video.pause();
-        const newIsPlaying = [...isPlaying];
-        newIsPlaying[index] = false;
-        setIsPlaying(newIsPlaying);
+        setIsPlaying((prev) => {
+          const copy = [...prev];
+          copy[index] = false;
+          return copy;
+        });
       }
     });
 
-    const newVideoLoaded = [...videoLoaded];
     if (currentIndex < projects.length) {
-      newVideoLoaded[currentIndex] = false;
-      setVideoLoaded(newVideoLoaded);
+      setVideoLoaded((prev) => {
+        const copy = [...prev];
+        copy[currentIndex] = false;
+        return copy;
+      });
     }
-  }, [currentIndex]);
+  }, [currentIndex, projects.length]);
 
   // Attempt to autoplay when the current project changes and the video is ready
   useEffect(() => {
@@ -282,15 +278,19 @@ export default function Projects() {
                         preload="auto"
                         onError={() => {
                           setVideoError(true);
-                          const newUseFallback = [...useFallback];
-                          newUseFallback[currentIndex] = true;
-                          setUseFallback(newUseFallback);
+                          setUseFallback((prev) => {
+                            const newUseFallback = [...prev];
+                            newUseFallback[currentIndex] = true;
+                            return newUseFallback;
+                          });
                         }}
                         onCanPlay={() => {
                           setVideoError(false);
-                          const newVideoLoaded = [...videoLoaded];
-                          newVideoLoaded[currentIndex] = true;
-                          setVideoLoaded(newVideoLoaded);
+                          setVideoLoaded((prev) => {
+                            const newVideoLoaded = [...prev];
+                            newVideoLoaded[currentIndex] = true;
+                            return newVideoLoaded;
+                          });
                           // Always try to autoplay the current slide when it can play
                           const video = videoRefs.current[currentIndex];
                           if (video) {
@@ -300,14 +300,18 @@ export default function Projects() {
                           }
                         }}
                         onPlay={() => {
-                          const newIsPlaying = [...isPlaying];
-                          newIsPlaying[currentIndex] = true;
-                          setIsPlaying(newIsPlaying);
+                          setIsPlaying((prev) => {
+                            const newIsPlaying = [...prev];
+                            newIsPlaying[currentIndex] = true;
+                            return newIsPlaying;
+                          });
                         }}
                         onPause={() => {
-                          const newIsPlaying = [...isPlaying];
-                          newIsPlaying[currentIndex] = false;
-                          setIsPlaying(newIsPlaying);
+                          setIsPlaying((prev) => {
+                            const newIsPlaying = [...prev];
+                            newIsPlaying[currentIndex] = false;
+                            return newIsPlaying;
+                          });
                         }}
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -380,7 +384,7 @@ export default function Projects() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  See what else I've been up to on GitHub
+                  See what else I&apos;ve been up to on GitHub
                 </motion.h3>
                 <motion.a
                   href="https://github.com/AugieAud"
