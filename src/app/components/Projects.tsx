@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // Define video paths and fallback images
-const ButlerBurgers = "/media/Butlerburger.mov";
 const ButteredBread = "/media/Buttered Bread Demo.mp4";
 const PhaserGame = "/media/2D game.mp4";
 const Buzzly = "/media/Buzzly Survey.mp4";
@@ -25,21 +24,6 @@ interface Project {
 }
 
 const projects: Project[] = [
-
-    {
-    title: "Butler Burgers",
-    description: "Designed and built for an American based burger restaurant. I worked closely with the client, communicating across timezones, to create a website that reflected their vision. I created the logo using Inkscape and was resposible for the planning, development, revisions and deployment on Netlify. Built using Javascript, HTML and Bootstrap.",
-    mediaUrl: ButlerBurgers,
-    type: "video",
-    fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
-  },
-    {
-    title: "Buzzly Sponsor Dashboard",
-    description: "This was for my internship at Buzzly, a New Zealand based company. I was responsible for creating part of the sponsor dashboard, building user authentication and creating a survey builder. Built using React, Typescript, AWS and Strapi CMS.",
-    mediaUrl: Buzzly,
-    type: "video",
-    fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
-  },
   {
     title: "Buttered Bread",
     description: "My first ever coding project, a website dedicated to my love of sourdough bread. Built using HTML, CSS and vanilla JavaScript. Lot's of room for growth and improvement here but I love the vibe I was going for and it's a great starting point for my journey into web development",
@@ -54,6 +38,43 @@ const projects: Project[] = [
     type: "video",
     fallbackImage: fallbackImages["Placeholder Title 2D Game"],
   },
+  {
+    title: "Buzzly Sponsor Dashboard",
+    description: ".",
+    mediaUrl: Buzzly,
+    type: "video",
+    fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
+  },
+  {
+    title: "Placeholder Title CLI Tool",
+    description: "Placeholder description for CLI Tool. Please replace.",
+    mediaUrl: "/media/CLI tool.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Car ID App",
+    description: "Placeholder description for Car ID App. Please replace.",
+    mediaUrl: "/media/Car ID app.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Car Insurance",
+    description: "Placeholder description for Car Insurance. Please replace.",
+    mediaUrl: "/media/Car Insurance.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Marketing Association NZ",
+    description: "Placeholder description for Marketing Association NZ. Please replace.",
+    mediaUrl: "/media/Marketing Association NZ.png",
+    type: "image",
+  },
+  {
+    title: "Placeholder Title Mock Job Interview",
+    description: "Placeholder description for Mock Job Interview. Please replace.",
+    mediaUrl: "/media/Mock job Interview.png",
+    type: "image",
+  },
 ];
 
 export default function Projects() {
@@ -64,18 +85,17 @@ export default function Projects() {
   const [useFallback, setUseFallback] = useState<boolean[]>(projects.map(() => false));
   const [videoLoaded, setVideoLoaded] = useState<boolean[]>(projects.map(() => false));
   const videoRefs = useRef<(HTMLVideoElement | null)[]>(projects.map(() => null));
-  const totalSlides = projects.length + 1; // extra slide for GitHub CTA
 
   // Navigation handlers
   const goToNext = useCallback(() => {
-    const nextIndex = (currentIndex + 1) % totalSlides;
+    const nextIndex = (currentIndex + 1) % projects.length;
     setPage([nextIndex, 1]);
-  }, [currentIndex, totalSlides]);
+  }, [currentIndex, isPlaying, videoLoaded]);
 
   const goToPrev = useCallback(() => {
-    const prevIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+    const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
     setPage([prevIndex, -1]);
-  }, [currentIndex, totalSlides]);
+  }, [currentIndex]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -131,22 +151,8 @@ export default function Projects() {
     });
 
     const newVideoLoaded = [...videoLoaded];
-    if (currentIndex < projects.length) {
-      newVideoLoaded[currentIndex] = false;
-      setVideoLoaded(newVideoLoaded);
-    }
-  }, [currentIndex]);
-
-  // Attempt to autoplay when the current project changes and the video is ready
-  useEffect(() => {
-    if (currentIndex >= projects.length) return;
-    const video = videoRefs.current[currentIndex];
-    if (!video) return;
-    if (video.readyState >= 3) {
-      setTimeout(() => {
-        video.play().catch(() => {});
-      }, 100);
-    }
+    newVideoLoaded[currentIndex] = false;
+    setVideoLoaded(newVideoLoaded);
   }, [currentIndex]);
 
   const paginate = useCallback(
@@ -154,7 +160,7 @@ export default function Projects() {
       if (isScrolling) return;
       setIsScrolling(true);
       const nextIndex = currentIndex + newDirection;
-      if (nextIndex >= 0 && nextIndex < totalSlides) {
+      if (nextIndex >= 0 && nextIndex < projects.length) {
         setPage([nextIndex, newDirection]);
         setTimeout(() => {
           setIsScrolling(false);
@@ -163,7 +169,7 @@ export default function Projects() {
         setIsScrolling(false);
       }
     },
-    [currentIndex, isScrolling, totalSlides]
+    [currentIndex, isScrolling]
   );
 
   // Use paginate in the keyboard navigation
@@ -199,40 +205,26 @@ export default function Projects() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Navigation Arrows (show only on hover over side zones) */}
-      <div className="pointer-events-none absolute inset-0 z-50">
-        <button
-          onClick={goToPrev}
-          className="group absolute left-0 top-0 h-full w-1/4 flex items-center pl-2 pointer-events-auto"
-          aria-label="Previous project"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8 text-foreground stroke-current opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        <button
-          onClick={goToNext}
-          className="group absolute right-0 top-0 h-full w-1/4 flex items-center justify-end pr-4 pointer-events-auto"
-          aria-label="Next project"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8 text-foreground stroke-current opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+      {/* Navigation Arrows */}
+      <button
+        onClick={goToPrev}
+        className="fixed left-4 top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+        aria-label="Previous project"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      
+      <button
+        onClick={goToNext}
+        className="fixed right-4 top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+        aria-label="Next project"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
 
       <motion.div
         className="h-full w-full"
@@ -257,144 +249,118 @@ export default function Projects() {
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 },
             }}
-            className="absolute inset-0 p-6"
+            className="absolute inset-0 flex flex-col md:flex-row items-center justify-center p-8 gap-8"
           >
-            <div className="mx-auto max-w-5xl h-full flex flex-col md:flex-row items-center justify-center gap-6">
-            {currentIndex < projects.length ? (
-              <>
-                <div className="md:w-3/5 h-full flex items-center justify-center">
-                  {projects[currentIndex].type === "video" && !useFallback[currentIndex] ? (
-                    <button
-                      className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
-                      onClick={handlePlayPause}
-                    >
-                      <motion.video
-                        key={`video-${currentIndex}-${projects[currentIndex].mediaUrl}`}
-                        ref={el => { videoRefs.current[currentIndex] = el; }}
-                        src={projects[currentIndex].mediaUrl}
-                        className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[480px]"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        loop
-                        muted
-                        playsInline
-                        preload="auto"
-                        onError={() => {
-                          setVideoError(true);
-                          const newUseFallback = [...useFallback];
-                          newUseFallback[currentIndex] = true;
-                          setUseFallback(newUseFallback);
-                        }}
-                        onCanPlay={() => {
-                          setVideoError(false);
-                          const newVideoLoaded = [...videoLoaded];
-                          newVideoLoaded[currentIndex] = true;
-                          setVideoLoaded(newVideoLoaded);
-                          // Always try to autoplay the current slide when it can play
-                          const video = videoRefs.current[currentIndex];
-                          if (video) {
-                            setTimeout(() => {
-                              video.play().catch(() => {});
-                            }, 100);
-                          }
-                        }}
-                        onPlay={() => {
-                          const newIsPlaying = [...isPlaying];
-                          newIsPlaying[currentIndex] = true;
-                          setIsPlaying(newIsPlaying);
-                        }}
-                        onPause={() => {
-                          const newIsPlaying = [...isPlaying];
-                          newIsPlaying[currentIndex] = false;
-                          setIsPlaying(newIsPlaying);
-                        }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        {videoError ? (
-                          <div className="bg-black bg-opacity-70 p-4 rounded-lg text-white">
-                            Error loading video. Switching to fallback image...
-                          </div>
+            <div className="md:w-2/3 h-full flex items-center justify-center">
+              {projects[currentIndex].type === "video" && !useFallback[currentIndex] ? (
+                <button
+                  className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
+                  onClick={handlePlayPause}
+                >
+                  <motion.video
+                    key={`video-${currentIndex}-${projects[currentIndex].mediaUrl}`}
+                    ref={el => { videoRefs.current[currentIndex] = el; }}
+                    src={projects[currentIndex].mediaUrl}
+                    className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    loop
+                    muted
+                    playsInline
+                    preload="auto"
+                    onError={() => {
+                      setVideoError(true);
+                      const newUseFallback = [...useFallback];
+                      newUseFallback[currentIndex] = true;
+                      setUseFallback(newUseFallback);
+                    }}
+                    onCanPlay={() => {
+                      setVideoError(false);
+                      const newVideoLoaded = [...videoLoaded];
+                      newVideoLoaded[currentIndex] = true;
+                      setVideoLoaded(newVideoLoaded);
+                      
+                      if (currentIndex === 0 && !isPlaying.some(playing => playing)) {
+                        const video = videoRefs.current[currentIndex];
+                        if (video) {
+                          setTimeout(() => {
+                            video.play().catch(() => {});
+                          }, 100);
+                        }
+                      }
+                    }}
+                    onPlay={() => {
+                      const newIsPlaying = [...isPlaying];
+                      newIsPlaying[currentIndex] = true;
+                      setIsPlaying(newIsPlaying);
+                    }}
+                    onPause={() => {
+                      const newIsPlaying = [...isPlaying];
+                      newIsPlaying[currentIndex] = false;
+                      setIsPlaying(newIsPlaying);
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {videoError ? (
+                      <div className="bg-black bg-opacity-70 p-4 rounded-lg text-white">
+                        Error loading video. Switching to fallback image...
+                      </div>
+                    ) : (
+                      <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
+                        {!isPlaying[currentIndex] ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="white"
+                            viewBox="0 0 24 24"
+                            className="w-16 h-16"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
                         ) : (
-                          <div className="opacity-0 group-hover:opacity-70 transition-opacity duration-200">
-                            {!isPlaying[currentIndex] ? (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="white"
-                                viewBox="0 0 24 24"
-                                className="w-16 h-16"
-                              >
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="white"
-                                viewBox="0 0 24 24"
-                                className="w-16 h-16"
-                              >
-                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                              </svg>
-                            )}
-                          </div>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="white"
+                            viewBox="0 0 24 24"
+                            className="w-16 h-16"
+                          >
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                          </svg>
                         )}
                       </div>
-                    </button>
-                  ) : (
-                    <motion.img
-                      src={projects[currentIndex].type === "video" && useFallback[currentIndex] && projects[currentIndex].fallbackImage 
-                        ? projects[currentIndex].fallbackImage 
-                        : projects[currentIndex].mediaUrl}
-                      alt={projects[currentIndex].title}
-                      className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[520px]"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                    />
-                  )}
-                </div>
-                <div className="md:w-2/5 flex flex-col justify-center space-y-4 text-center md:text-left">
-                  <motion.h3
-                    className="text-3xl font-semibold mb-6"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    {projects[currentIndex].title}
-                  </motion.h3>
-                  <motion.p
-                    className="text-foreground text-xl"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    {projects[currentIndex].description}
-                  </motion.p>
-                </div>
-              </>
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-center">
-                <motion.h3
-                  className="text-3xl font-semibold mb-6"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
+                    )}
+                  </div>
+                </button>
+              ) : (
+                <motion.img
+                  src={projects[currentIndex].type === "video" && useFallback[currentIndex] && projects[currentIndex].fallbackImage 
+                    ? projects[currentIndex].fallbackImage 
+                    : projects[currentIndex].mediaUrl}
+                  alt={projects[currentIndex].title}
+                  className="w-full h-[400px] object-cover rounded-lg shadow-lg"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                >
-                  See what else I've been up to on GitHub
-                </motion.h3>
-                <motion.a
-                  href="https://github.com/AugieAud"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-lg bg-white text-black font-medium shadow hover:shadow-lg transition"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Visit my GitHub
-                </motion.a>
-              </div>
-            )}
+                />
+              )}
+            </div>
+            <div className="md:w-1/3 flex flex-col justify-center space-y-4 text-center md:text-left">
+              <motion.h3
+                className="text-3xl font-semibold mb-6"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {projects[currentIndex].title}
+              </motion.h3>
+              <motion.p
+                className="text-foreground text-xl"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                {projects[currentIndex].description}
+              </motion.p>
             </div>
           </motion.div>
         </AnimatePresence>
@@ -402,7 +368,7 @@ export default function Projects() {
 
       {/* Dots indicator */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
-        {Array.from({ length: totalSlides }).map((_, index) => (
+        {projects.map((_, index) => (
           <button
             key={index}
             onClick={() => {
@@ -415,7 +381,7 @@ export default function Projects() {
                 ? "bg-white w-6"
                 : "bg-gray-400 hover:bg-gray-200"
             }`}
-            aria-label={index < projects.length ? `Go to project ${index + 1}` : "Go to GitHub slide"}
+            aria-label={`Go to project ${index + 1}`}
           />
         ))}
       </div>
