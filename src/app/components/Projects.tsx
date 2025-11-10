@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // Define video paths and fallback images
 const ButlerBurgers = "/media/Butlerburger.mov";
 const ButteredBread = "/media/Buttered Bread Demo.mp4";
+const PhaserGame = "/media/2D game.mp4";
 const Buzzly = "/media/Buzzly Survey.mp4";
 
 // Fallback images in case videos fail to load
@@ -45,6 +46,13 @@ const projects: Project[] = [
     mediaUrl: ButteredBread,
     type: "video",
     fallbackImage: fallbackImages["Buttered Bread"],
+  },
+  {
+    title: "Phaser Ping Pong Game",
+    description: "Playing around with phaser and have made this simple pong game. Built using HTML, CSS and vanilla JavaScript.",
+    mediaUrl: PhaserGame,
+    type: "video",
+    fallbackImage: fallbackImages["Placeholder Title 2D Game"],
   },
 ];
 
@@ -191,26 +199,40 @@ export default function Projects() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Navigation Arrows */}
-      <button
-        onClick={goToPrev}
-        className="fixed left-4 top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-        aria-label="Previous project"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      
-      <button
-        onClick={goToNext}
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-        aria-label="Next project"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      {/* Navigation Arrows (show only on hover over side zones) */}
+      <div className="pointer-events-none absolute inset-0 z-50">
+        <button
+          onClick={goToPrev}
+          className="group absolute left-0 top-0 h-full w-1/4 flex items-center pl-2 pointer-events-auto"
+          aria-label="Previous project"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8 text-foreground stroke-current opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <button
+          onClick={goToNext}
+          className="group absolute right-0 top-0 h-full w-1/4 flex items-center justify-end pr-4 pointer-events-auto"
+          aria-label="Next project"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8 text-foreground stroke-current opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
 
       <motion.div
         className="h-full w-full"
@@ -235,11 +257,12 @@ export default function Projects() {
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 },
             }}
-            className="absolute inset-0 flex flex-col md:flex-row items-center justify-center p-8 gap-8"
+            className="absolute inset-0 p-6"
           >
+            <div className="mx-auto max-w-5xl h-full flex flex-col md:flex-row items-center justify-center gap-6">
             {currentIndex < projects.length ? (
               <>
-                <div className="md:w-2/3 h-full flex items-center justify-center">
+                <div className="md:w-3/5 h-full flex items-center justify-center">
                   {projects[currentIndex].type === "video" && !useFallback[currentIndex] ? (
                     <button
                       className="relative w-full flex justify-center items-center min-h-[400px] max-h-[600px] group"
@@ -249,7 +272,7 @@ export default function Projects() {
                         key={`video-${currentIndex}-${projects[currentIndex].mediaUrl}`}
                         ref={el => { videoRefs.current[currentIndex] = el; }}
                         src={projects[currentIndex].mediaUrl}
-                        className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[600px]"
+                        className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[480px]"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.2 }}
@@ -323,14 +346,14 @@ export default function Projects() {
                         ? projects[currentIndex].fallbackImage 
                         : projects[currentIndex].mediaUrl}
                       alt={projects[currentIndex].title}
-                      className="w-full h-[400px] object-cover rounded-lg shadow-lg"
+                      className="rounded-lg shadow-lg w-full h-auto object-contain max-h-[520px]"
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ delay: 0.2 }}
                     />
                   )}
                 </div>
-                <div className="md:w-1/3 flex flex-col justify-center space-y-4 text-center md:text-left">
+                <div className="md:w-2/5 flex flex-col justify-center space-y-4 text-center md:text-left">
                   <motion.h3
                     className="text-3xl font-semibold mb-6"
                     initial={{ y: 20, opacity: 0 }}
@@ -372,6 +395,7 @@ export default function Projects() {
                 </motion.a>
               </div>
             )}
+            </div>
           </motion.div>
         </AnimatePresence>
       </motion.div>
