@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 // Define video paths and fallback images
 const ButteredBread = "/media/Buttered Bread Demo.mp4";
-const PhaserGame = "/media/2D game.mp4";
+const ButlerBurgers = "/media/Butlerburger.mov";
 const Buzzly = "/media/Buzzly Survey.mp4";
 
 // Fallback images in case videos fail to load
@@ -26,8 +26,8 @@ interface Project {
 const projects: Project[] = [
     {
     title: "Butler Burgers",
-    description: "Designed and built for an American based burger restaurant. I worked closely with the client, communicating across timezones, to create a website that reflected their vision. I created the logo using Inkscape and was resposible for the planning, development, revisions and deployment on Netlify. Built using Javascript, HTML and Bootstrap.",
-    mediaUrl: Buzzly,
+    description: "Designed and built for an American based burger restaurant. I worked closely with the client, communicating across timezones, to create a website that reflected their vision. I created the logo using Inkscape and was resposible for the planning, development, revisions and deployment on Netlify. Built using Next.js, Typescript and Tailwind CSS.",
+    mediaUrl: ButlerBurgers,
     type: "video",
     fallbackImage: fallbackImages["Placeholder Title Buzzly Survey"],
   },
